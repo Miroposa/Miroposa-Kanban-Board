@@ -1,0 +1,21 @@
+# OS / Editor
+Thumbs.db
+Desktop.ini
+.DS_Store
+.~lock.*
+*.tmp
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Lokale Runtime / Logs
+**/kanban-server.log
+**/manager-server.log
+**/manager-registry.json
+
+# Office-Lockfiles
+~$*
