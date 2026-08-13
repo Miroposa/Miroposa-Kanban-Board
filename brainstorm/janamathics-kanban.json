@@ -1,0 +1,211 @@
+{
+  "columns": [
+    {
+      "id": "brainstorm",
+      "title": "Brainstorm",
+      "hint": "Freie Ideen",
+      "color": "yellow"
+    },
+    {
+      "id": "backlog",
+      "title": "Backlog",
+      "hint": "Irgendwann / geparkt",
+      "color": "orange"
+    },
+    {
+      "id": "next",
+      "title": "Als Nächstes",
+      "hint": "Konkrete Prioritäten",
+      "color": "blue"
+    },
+    {
+      "id": "in-bearbeitung",
+      "title": "In Bearbeitung",
+      "hint": "",
+      "color": "brown"
+    },
+    {
+      "id": "ist",
+      "title": "Umgesetzt",
+      "hint": "Was schon im Spiel steckt",
+      "color": "green"
+    }
+  ],
+  "cards": [
+    {
+      "id": "b1",
+      "column": "brainstorm",
+      "title": "Rückweg Klassenzimmer → Außenwelt",
+      "notes": "",
+      "color": "none"
+    },
+    {
+      "id": "b2",
+      "column": "brainstorm",
+      "title": "Mehr Karten: Wald, Park, Stadt",
+      "notes": "",
+      "color": "none"
+    },
+    {
+      "id": "b3",
+      "column": "brainstorm",
+      "title": "NPCs / Freunde zum Quatschen",
+      "notes": "",
+      "color": "none"
+    },
+    {
+      "id": "b4",
+      "column": "brainstorm",
+      "title": "Geheimwege & versteckte Sammelobjekte",
+      "notes": "",
+      "color": "none"
+    },
+    {
+      "id": "b5",
+      "column": "brainstorm",
+      "title": "Tageszeit / Wetter",
+      "notes": "",
+      "color": "none"
+    },
+    {
+      "id": "b6",
+      "column": "brainstorm",
+      "title": "Mehr Rechenarten: × ÷ Brüche?",
+      "notes": "",
+      "color": "none"
+    },
+    {
+      "id": "b7",
+      "column": "brainstorm",
+      "title": "Themenwelten: Geld, Uhr, Geometrie",
+      "notes": "",
+      "color": "none"
+    },
+    {
+      "id": "b8",
+      "column": "brainstorm",
+      "title": "Belohnungen sichtbar in der Welt",
+      "notes": "",
+      "color": "none"
+    },
+    {
+      "id": "b9",
+      "column": "brainstorm",
+      "title": "Lehrer-NPC / Hilfe bei Fehlern",
+      "notes": "",
+      "color": "none"
+    },
+    {
+      "id": "b10",
+      "column": "brainstorm",
+      "title": "Speichern / Fortschritt laden",
+      "notes": "",
+      "color": "none"
+    },
+    {
+      "id": "b11",
+      "column": "brainstorm",
+      "title": "Hauptmenü + Einstellungen",
+      "notes": "",
+      "color": "none"
+    },
+    {
+      "id": "b12",
+      "column": "brainstorm",
+      "title": "Achievements / Sammelbuch",
+      "notes": "",
+      "color": "none"
+    },
+    {
+      "id": "b13",
+      "column": "brainstorm",
+      "title": "Offene Fragen: Zielgruppe? Story oder Sandbox? Mobile?",
+      "notes": "Zum Brainstormen offen lassen",
+      "color": "none"
+    },
+    {
+      "id": "c_yzdml4dgsanf",
+      "title": "Weitere Level Ideen kreieren.",
+      "notes": "",
+      "column": "brainstorm",
+      "color": "none"
+    },
+    {
+      "id": "c_f1u1p58lle8f",
+      "title": "Startanleitung schreiben",
+      "notes": "",
+      "column": "backlog",
+      "color": "pink"
+    },
+    {
+      "id": "c4",
+      "column": "backlog",
+      "title": "Schultür - Maus Anzeige ändern",
+      "notes": "",
+      "color": "brown"
+    },
+    {
+      "id": "n1",
+      "column": "next",
+      "title": "Rückweg aus dem Klassenzimmer",
+      "notes": "Sinnvoller nächster Baustein laut Architektur",
+      "color": "green"
+    },
+    {
+      "id": "c5",
+      "column": "in-bearbeitung",
+      "title": "Haus 1: Mathe-Quiz: +/− Gleichungen",
+      "notes": "Sound Animationen fehlen",
+      "color": "none"
+    },
+    {
+      "id": "c2",
+      "column": "in-bearbeitung",
+      "title": "Parallax Background verfeinern",
+      "notes": "",
+      "color": "none"
+    },
+    {
+      "id": "c1",
+      "column": "ist",
+      "title": "2D Godot 4.7 – Janamathics",
+      "notes": "",
+      "color": "green"
+    },
+    {
+      "id": "c3",
+      "column": "ist",
+      "title": "Player: Animationen",
+      "notes": "",
+      "color": "green"
+    },
+    {
+      "id": "c6",
+      "column": "ist",
+      "title": "Früchte & Blumen sammeln (Respawn)",
+      "notes": "",
+      "color": "none"
+    },
+    {
+      "id": "c7",
+      "column": "ist",
+      "title": "Spielplatz: Schaukel, Rutsche, Federwippe",
+      "notes": "",
+      "color": "green"
+    },
+    {
+      "id": "c9",
+      "column": "ist",
+      "title": "GameState Autoload über Szenen",
+      "notes": "",
+      "color": "green"
+    },
+    {
+      "id": "c8",
+      "column": "ist",
+      "title": "HUD: Score + Herzen (global)",
+      "notes": "",
+      "color": "none"
+    }
+  ]
+}

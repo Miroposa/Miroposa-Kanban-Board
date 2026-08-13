@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-i18n="app.title">Kanban-Manager</title>
+  <link rel="stylesheet" href="theme_shared.css" />
+  <style>
+    :root {
+      --bg: #1f3d2f;
+      --bg-2: #274c3a;
+      --bg-angle: 160deg;
+      --bg-spots: 1;
+      --chalk: #e8f0e6;
+      --ink: #1a241c;
+      --muted: #5c6d60;
+      --paper: #fffdf6;
+      --line: #d7d0bc;
+      --accent: #e2a53a;
+      --ok: #6f9b6a;
+      --danger: #c45c4a;
+      --shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+      --radius: 16px;
+      --font: "Segoe UI", Candara, Calibri, "Trebuchet MS", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: var(--font);
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 18% 12%, rgba(255,255,255, calc(0.07 * var(--bg-spots))), transparent 42%),
+        radial-gradient(circle at 92% 78%, rgba(0,0,0, calc(0.18 * var(--bg-spots))), transparent 45%),
+        linear-gradient(var(--bg-angle), var(--bg), var(--bg-2));
+    }
+
+    html.theme-no-spots, html.theme-no-spots body {
+      background: linear-gradient(var(--bg-angle), var(--bg), var(--bg-2));
+    }
+
+    body {
+      padding: 28px 20px 40px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .shell {
+      width: min(980px, 100%);
+      display: grid;
+      gap: 18px;
+    }
+
+    header {
+      color: var(--chalk);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: end;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: clamp(1.6rem, 3vw, 2.1rem);
+      letter-spacing: 0.01em;
+    }
+
+    header p {
+      margin: 6px 0 0;
+      opacity: 0.85;
+    }
+
+    .panel {
+      background: var(--paper);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px 22px;
+      border: 1px solid rgba(215, 208, 188, 0.8);
+    }
+
+    .panel h2 {
+      margin: 0 0 14px;
+      font-size: 1.15rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 18px;
+    }
+
+    @media (max-width: 860px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 12px;
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      font: inherit;
+      color: var(--ink);
+      background: #fff;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 120px;
+      gap: 10px;
+    }
+
+    .checks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin: 4px 0 14px;
+      color: var(--ink);
+      font-size: 0.92rem;
+    }
+
+    .checks label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      color: var(--ink);
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 16px;
+      background: var(--accent);
+      color: #2a1d05;
+      font: inherit;
+      font-weight: 650;
+      cursor: pointer;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.15);
+    }
+
+    button.secondary {
+      background: rgba(255,255,255,0.92);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+
+    button.danger {
+      background: #f5d7d2;
+      color: var(--danger);
+      box-shadow: none;
+    }
+
+    button:hover { filter: brightness(1.04); }
+    button:disabled { opacity: 0.55; cursor: wait; }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .hint {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .status {
+      min-height: 1.3em;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .status.ok { color: var(--ok); }
+    .status.err { color: var(--danger); }
+
+    .board-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin: 0 0 12px;
+    }
+
+    .board-toolbar input[type="search"] {
+      flex: 1;
+      min-width: 180px;
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      outline: none;
+    }
+
+    .board-toolbar input[type="search"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(226, 165, 58, 0.22);
+    }
+
+    .board-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+
+    .board h3 {
+      margin: 0 0 4px;
+      font-size: 1.02rem;
+    }
+
+    .meta {
+      margin: 0;
+      font-size: 0.82rem;
+      color: var(--muted);
+      word-break: break-all;
+    }
+
+    .badge {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 650;
+      vertical-align: middle;
+    }
+
+    .badge.on {
+      background: #edf6ea;
+      color: #3f6b3c;
+    }
+
+    .badge.off {
+      background: #f3efe6;
+      color: #7a6e58;
+    }
+
+    .badge.legacy {
+      background: #fff3bf;
+      color: #7a5a12;
+    }
+
+    .empty {
+      padding: 18px;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+    }
+
+    .path-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: start;
+    }
+
+    .path-row input {
+      font-size: 0.88rem;
+    }
+
+    .path-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .path-actions button {
+      white-space: nowrap;
+      padding: 9px 12px;
+    }
+
+    .icon-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+      gap: 8px;
+      margin: 8px 0 12px;
+    }
+
+    .icon-choice {
+      border: 2px solid transparent;
+      background: #fff;
+      border-radius: 12px;
+      padding: 6px 4px 4px;
+      cursor: pointer;
+      display: grid;
+      gap: 4px;
+      justify-items: center;
+      box-shadow: none;
+      color: var(--muted);
+      font-size: 0.68rem;
+      font-weight: 600;
+    }
+
+    .icon-choice img {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .icon-choice:hover {
+      border-color: #e6d27a;
+      filter: none;
+    }
+
+    .icon-choice.selected {
+      border-color: var(--accent);
+      background: #fff8e6;
+      color: var(--ink);
+    }
+
+    .icon-row {
+      display: grid;
+      grid-template-columns: 72px 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .icon-preview {
+      width: 72px;
+      height: 72px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(45deg, #eee 25%, transparent 25%),
+        linear-gradient(-45deg, #eee 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #eee 75%),
+        linear-gradient(-45deg, transparent 75%, #eee 75%);
+      background-size: 12px 12px;
+      background-position: 0 0, 0 6px, 6px -6px, -6px 0;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+
+    .icon-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .icon-preview .placeholder {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-align: center;
+      padding: 6px;
+    }
+
+    .board-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid var(--line);
+      background: #fff;
+      flex-shrink: 0;
+    }
+
+    .board-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    dialog {
+      border: 0;
+      border-radius: 16px;
+      padding: 0;
+      background: transparent;
+      max-width: min(480px, calc(100vw - 24px));
+      width: 100%;
+    }
+
+    dialog::backdrop { background: rgba(15, 28, 20, 0.55); }
+
+    .dialog-body {
+      background: var(--paper);
+      border-radius: 16px;
+      padding: 18px 18px 16px;
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 4px;
+    }
+
+    .dialog-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 8px;
+    }
+
+    header .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div>
+        <h1 data-i18n="app.title">Kanban-Manager</h1>
+        <p data-i18n="app.subtitle">Lokale Boards anlegen, öffnen und verwalten.</p>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="secondary" id="btn-manager-shortcut" data-i18n="btn.desktopShortcut">Desktop-Verknüpfung</button>
+        <button type="button" class="secondary" id="btn-settings" data-i18n="btn.settings">Einstellungen</button>
+        <button type="button" class="secondary" id="btn-refresh" data-i18n="btn.refresh">Aktualisieren</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <section class="panel">
+        <h2 data-i18n="section.newBoard">Neues Board</h2>
+        <form id="create-form">
+          <label><span data-i18n="field.projectName">Projektname</span>
+            <input id="field-name" type="text" required data-i18n-placeholder="ph.projectName" placeholder="z. B. Mein Kanban Board" maxlength="80" autocomplete="off" />
+          </label>
+          <div class="row">
+            <label><span data-i18n="field.slug">Kurzname (Ordner)</span>
+              <input id="field-slug" type="text" data-i18n-placeholder="ph.slug" placeholder="wird aus dem Namen erzeugt" maxlength="60" autocomplete="off" />
+            </label>
+            <label><span data-i18n="field.port">Port</span>
+              <input id="field-port" type="number" min="1024" max="65535" data-i18n-placeholder="ph.port" placeholder="auto" />
+            </label>
+          </div>
+
+          <label><span data-i18n="field.storage">Speicherort</span>
+            <div class="path-row">
+              <input id="field-parent" type="text" required data-i18n-placeholder="ph.storage" placeholder="Ordner, in dem das Board angelegt wird" autocomplete="off" />
+              <div class="path-actions">
+                <button type="button" class="secondary" id="btn-pick-parent" data-i18n="btn.pickFolder">Ordner wählen</button>
+                <button type="button" class="secondary" id="btn-save-root" data-i18n="btn.saveRoot">Als Standard</button>
+              </div>
+            </div>
+          </label>
+          <p class="hint" id="path-hint"></p>
+
+          <label><span data-i18n="field.icon">Icon (Desktop-Verknüpfung)</span>
+            <div class="icon-gallery" id="icon-gallery" aria-label="Icon-Vorrat"></div>
+            <div class="icon-row">
+              <div class="icon-preview" id="icon-preview"><span class="placeholder">—</span></div>
+              <input id="field-icon" type="text" data-i18n-placeholder="ph.icon" placeholder="Vorrat wählen oder eigenes Bild…" autocomplete="off" />
+              <div class="path-actions">
+                <button type="button" class="secondary" id="btn-pick-icon" data-i18n="btn.pickImage">Eigenes Bild</button>
+                <button type="button" class="secondary" id="btn-clear-icon" data-i18n="btn.clearIcon">Entfernen</button>
+              </div>
+            </div>
+          </label>
+
+          <div class="checks">
+            <label><input id="field-open" type="checkbox" checked /> <span data-i18n="check.openAfter">Danach öffnen</span></label>
+            <label><input id="field-desktop" type="checkbox" checked /> <span data-i18n="check.desktop">Desktop-Verknüpfung</span></label>
+            <label><input id="field-force" type="checkbox" /> <span data-i18n="check.force">Überschreiben, falls vorhanden</span></label>
+          </div>
+
+          <div class="actions">
+            <button type="submit" id="btn-create" data-i18n="btn.create">Board erstellen</button>
+            <p class="hint" id="meta-hint" data-i18n="meta.hintLoading">Standardordner wird geladen…</p>
+          </div>
+          <p class="status" id="form-status" role="status"></p>
+        </form>
+      </section>
+
+      <section class="panel">
+        <h2 data-i18n="section.yourBoards">Deine Boards</h2>
+        <div class="board-toolbar">
+          <input
+            id="board-search"
+            type="search"
+            data-i18n-placeholder="ph.boardSearch"
+            placeholder="Boards suchen (Name, Port, Pfad)…"
+            autocomplete="off"
+          />
+        </div>
+        <div class="board-list" id="board-list">
+          <div class="empty" data-i18n="empty.loading">Lade Boards…</div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <dialog id="theme-dialog"></dialog>
+  <script src="i18n_lib.js"></script>
+  <script src="theme_lib.js"></script>
+  <script>
+    const form = document.getElementById("create-form");
+    const fieldName = document.getElementById("field-name");
+    const fieldSlug = document.getElementById("field-slug");
+    const fieldPort = document.getElementById("field-port");
+    const fieldParent = document.getElementById("field-parent");
+    const fieldIcon = document.getElementById("field-icon");
+    const fieldOpen = document.getElementById("field-open");
+    const fieldDesktop = document.getElementById("field-desktop");
+    const fieldForce = document.getElementById("field-force");
+    const formStatus = document.getElementById("form-status");
+    const boardList = document.getElementById("board-list");
+    const boardSearch = document.getElementById("board-search");
+    const metaHint = document.getElementById("meta-hint");
+    const pathHint = document.getElementById("path-hint");
+    const iconPreview = document.getElementById("icon-preview");
+    const iconGallery = document.getElementById("icon-gallery");
+    let slugTouched = false;
+    let slugTimer = null;
+    let boardsRoot = "";
+    let iconPreviewUrl = "";
+    let selectedIconId = "";
+    let presetIcons = [];
+    /** @type {Array<object>} */
+    let allBoards = [];
+    let boardSearchQuery = "";
+    function t(key, vars) {
+      return window.KanbanI18n ? window.KanbanI18n.t(key, vars) : key;
+    }
+
+    function applyUiLang(langMode) {
+      if (!window.KanbanI18n) return;
+      window.KanbanI18n.setLang(langMode || "auto");
+      window.KanbanI18n.applyToDom(document);
+      updatePathHint();
+      refreshBoards().catch(() => {});
+    }
+
+    let currentTheme = window.KanbanTheme.normalizeTheme(window.KanbanTheme.DEFAULT_THEME);
+    let themeDialogApi = null;
+
+    // Systemsprache als Start (wird nach /api/meta ggf. überschrieben)
+    if (window.KanbanI18n) {
+      window.KanbanI18n.setLang(currentTheme.lang || "auto");
+      window.KanbanI18n.applyToDom(document);
+    }
+
+    const themeDialog = document.getElementById("theme-dialog");
+    themeDialog.innerHTML = window.KanbanTheme.settingsDialogHtml();
+    themeDialogApi = window.KanbanTheme.bindThemeDialog({
+      dialog: themeDialog,
+      initial: currentTheme,
+      onLangChange: (mode) => applyUiLang(mode),
+      onSave: async (theme) => {
+        const data = await api("/api/settings/theme", {
+          method: "POST",
+          body: JSON.stringify({ theme }),
+        });
+        currentTheme = window.KanbanTheme.normalizeTheme(data.theme);
+        window.KanbanTheme.applyTheme(currentTheme);
+        applyUiLang(currentTheme.lang || "auto");
+        setStatus(formStatus, t("status.themeSaved"), "ok");
+      },
+    });
+
+    document.getElementById("btn-settings").addEventListener("click", () => {
+      themeDialogApi.open(currentTheme);
+    });
+
+    document.getElementById("btn-manager-shortcut").addEventListener("click", async () => {
+      const btn = document.getElementById("btn-manager-shortcut");
+      btn.disabled = true;
+      try {
+        const data = await api("/api/settings/manager-shortcut", { method: "POST", body: "{}" });
+        setStatus(formStatus, t("status.shortcutCreated") + (data.shortcut ? " · " + data.shortcut : ""), "ok");
+      } catch (err) {
+        setStatus(formStatus, err.message || String(err), "err");
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    function setIconPreview(dataUrl) {
+      iconPreviewUrl = dataUrl || "";
+      if (iconPreviewUrl) {
+        iconPreview.innerHTML = "";
+        const img = document.createElement("img");
+        img.src = iconPreviewUrl;
+        img.alt = "Icon-Vorschau";
+        iconPreview.appendChild(img);
+      } else {
+        iconPreview.innerHTML = '<span class="placeholder">kein Icon</span>';
+      }
+    }
+
+    function syncGallerySelection() {
+      iconGallery.querySelectorAll(".icon-choice").forEach((btn) => {
+        btn.classList.toggle("selected", btn.dataset.id === selectedIconId);
+      });
+    }
+
+    function selectPresetIcon(icon) {
+      selectedIconId = icon.id;
+      fieldIcon.value = icon.path;
+      setIconPreview(icon.previewUrl);
+      syncGallerySelection();
+    }
+
+    function renderIconGallery(icons) {
+      presetIcons = icons || [];
+      iconGallery.innerHTML = "";
+      if (!presetIcons.length) {
+        iconGallery.innerHTML = '<p class="hint">Kein Icon-Vorrat gefunden (icons/).</p>';
+        return;
+      }
+      for (const icon of presetIcons) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "icon-choice";
+        btn.dataset.id = icon.id;
+        btn.title = icon.label;
+        const img = document.createElement("img");
+        img.src = icon.previewUrl;
+        img.alt = icon.label;
+        const span = document.createElement("span");
+        span.textContent = icon.label;
+        btn.appendChild(img);
+        btn.appendChild(span);
+        btn.addEventListener("click", () => {
+          selectPresetIcon(icon);
+          setStatus(formStatus, "Icon „" + icon.label + "“ gewählt.", "ok");
+        });
+        iconGallery.appendChild(btn);
+      }
+      syncGallerySelection();
+    }
+
+    async function refreshIcons() {
+      const data = await api("/api/icons");
+      renderIconGallery(data.icons || []);
+    }
+
+    function setStatus(el, text, kind) {
+      el.textContent = text || "";
+      el.className = "status" + (kind ? " " + kind : "");
+    }
+
+    function updatePathHint() {
+      const slug = (fieldSlug.value || "slug").trim() || "slug";
+      const parent = (fieldParent.value || boardsRoot || "…").trim();
+      const full = parent.replace(/[\\/]+$/, "") + "\\" + slug;
+      pathHint.textContent = t("path.hint", { path: full });
+    }
+
+    async function api(path, options) {
+      const res = await fetch(path, {
+        cache: "no-store",
+        headers: { "Content-Type": "application/json" },
+        ...options,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || ("HTTP " + res.status));
+      }
+      return data;
+    }
+
+    async function refreshMeta() {
+      const meta = await api("/api/meta");
+      boardsRoot = meta.boardsRoot || "";
+      if (!fieldParent.value.trim()) {
+        fieldParent.value = boardsRoot;
+      }
+      metaHint.textContent = "Standard: " + boardsRoot + " · Vorschlag Port " + meta.suggestedPort;
+      if (!fieldPort.value) fieldPort.placeholder = String(meta.suggestedPort);
+      if (meta.theme) {
+        currentTheme = window.KanbanTheme.normalizeTheme(meta.theme);
+        window.KanbanTheme.applyTheme(currentTheme);
+        applyUiLang(currentTheme.lang || "auto");
+      } else {
+        applyUiLang("auto");
+      }
+      updatePathHint();
+    }
+
+    function boardMatchesQuery(board, q) {
+      if (!q) return true;
+      const hay = [
+        board.name,
+        board.title,
+        board.slug,
+        String(board.port || ""),
+        board.path,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return hay.includes(q);
+    }
+
+    function renderBoards() {
+      const q = boardSearchQuery.trim().toLowerCase();
+      const boards = allBoards.filter((b) => boardMatchesQuery(b, q));
+
+      if (!allBoards.length) {
+        boardList.innerHTML = '<div class="empty">' + t("empty.boards") + '</div>';
+        return;
+      }
+      if (!boards.length) {
+        boardList.innerHTML = '<div class="empty">' + t("empty.boardSearch") + '</div>';
+        return;
+      }
+
+      boardList.innerHTML = "";
+      for (const board of boards) {
+        const el = document.createElement("article");
+        el.className = "board";
+
+        const left = document.createElement("div");
+        const titleRow = document.createElement("div");
+        titleRow.className = "board-title-row";
+
+        if (board.hasIcon && board.iconUrl) {
+          const img = document.createElement("img");
+          img.className = "board-icon";
+          img.src = board.iconUrl + "&t=" + Date.now();
+          img.alt = "";
+          titleRow.appendChild(img);
+        }
+
+        const h3 = document.createElement("h3");
+        h3.textContent = board.name || board.title;
+        if (board.legacy) {
+          const badge = document.createElement("span");
+          badge.className = "badge legacy";
+          badge.textContent = t("badge.project");
+          h3.appendChild(badge);
+        }
+        const run = document.createElement("span");
+        run.className = "badge " + (board.running ? "on" : "off");
+        run.textContent = board.running ? t("badge.on") : t("badge.off");
+        h3.appendChild(run);
+        titleRow.appendChild(h3);
+
+        const meta = document.createElement("p");
+        meta.className = "meta";
+        const cards = board.cardCount == null ? "?" : board.cardCount;
+        meta.textContent = "Port " + board.port + " · " + cards + " " + t("cards") + " · " + board.path;
+
+        left.appendChild(titleRow);
+        left.appendChild(meta);
+
+        const actions = document.createElement("div");
+        actions.className = "actions";
+
+        const openBtn = document.createElement("button");
+        openBtn.type = "button";
+        openBtn.textContent = t("btn.open");
+        openBtn.addEventListener("click", async () => {
+          openBtn.disabled = true;
+          try {
+            await api("/api/boards/open", {
+              method: "POST",
+              body: JSON.stringify({ slug: board.slug }),
+            });
+            await refreshBoards();
+          } catch (err) {
+            alert(err.message || String(err));
+          } finally {
+            openBtn.disabled = false;
+          }
+        });
+        actions.appendChild(openBtn);
+
+        const iconBtn = document.createElement("button");
+        iconBtn.type = "button";
+        iconBtn.className = "secondary";
+        iconBtn.textContent = t("btn.icon");
+        iconBtn.title = t("btn.icon");
+        iconBtn.addEventListener("click", async () => {
+          iconBtn.disabled = true;
+          try {
+            const data = await api("/api/boards/set-icon", {
+              method: "POST",
+              body: JSON.stringify({
+                slug: board.slug,
+                desktopShortcut: true,
+              }),
+            });
+            if (!data.cancelled) {
+              await refreshBoards();
+            }
+          } catch (err) {
+            alert(err.message || String(err));
+          } finally {
+            iconBtn.disabled = false;
+          }
+        });
+        actions.appendChild(iconBtn);
+
+        if (!board.legacy) {
+          const delBtn = document.createElement("button");
+          delBtn.type = "button";
+          delBtn.className = "danger";
+          delBtn.textContent = t("btn.delete");
+          delBtn.addEventListener("click", async () => {
+            if (!confirm(t("confirm.delete", { name: board.name || board.slug }))) return;
+            delBtn.disabled = true;
+            try {
+              await api("/api/boards/delete", {
+                method: "POST",
+                body: JSON.stringify({ slug: board.slug, confirm: true }),
+              });
+              await refreshBoards();
+              await refreshMeta();
+            } catch (err) {
+              alert(err.message || String(err));
+            } finally {
+              delBtn.disabled = false;
+            }
+          });
+          actions.appendChild(delBtn);
+        }
+
+        el.appendChild(left);
+        el.appendChild(actions);
+        boardList.appendChild(el);
+      }
+    }
+
+    async function refreshBoards() {
+      const data = await api("/api/boards");
+      allBoards = data.boards || [];
+      renderBoards();
+    }
+
+    boardSearch.addEventListener("input", () => {
+      boardSearchQuery = boardSearch.value || "";
+      renderBoards();
+    });
+
+    fieldSlug.addEventListener("input", () => {
+      slugTouched = fieldSlug.value.trim().length > 0;
+      updatePathHint();
+    });
+
+    fieldParent.addEventListener("input", updatePathHint);
+
+    fieldName.addEventListener("input", () => {
+      if (slugTouched) return;
+      clearTimeout(slugTimer);
+      slugTimer = setTimeout(async () => {
+        try {
+          const data = await api("/api/slugify", {
+            method: "POST",
+            body: JSON.stringify({ name: fieldName.value }),
+          });
+          fieldSlug.value = data.slug || "";
+          updatePathHint();
+        } catch {
+          /* ignore */
+        }
+      }, 180);
+    });
+
+    document.getElementById("btn-pick-parent").addEventListener("click", async () => {
+      const btn = document.getElementById("btn-pick-parent");
+      btn.disabled = true;
+      setStatus(formStatus, t("status.pickFolder"));
+      try {
+        const data = await api("/api/pick-folder", {
+          method: "POST",
+          body: JSON.stringify({
+            initial: fieldParent.value.trim() || boardsRoot,
+            title: "Speicherort für Kanban-Boards wählen",
+          }),
+        });
+        if (data.cancelled || !data.path) {
+          setStatus(formStatus, t("status.cancelled"));
+          return;
+        }
+        fieldParent.value = data.path;
+        updatePathHint();
+        setStatus(formStatus, t("status.folderSet"), "ok");
+      } catch (err) {
+        setStatus(formStatus, err.message || String(err), "err");
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById("btn-save-root").addEventListener("click", async () => {
+      const btn = document.getElementById("btn-save-root");
+      const path = fieldParent.value.trim();
+      if (!path) {
+        setStatus(formStatus, "Bitte zuerst einen Speicherort wählen.", "err");
+        return;
+      }
+      btn.disabled = true;
+      try {
+        const data = await api("/api/settings/boards-root", {
+          method: "POST",
+          body: JSON.stringify({ path }),
+        });
+        boardsRoot = data.boardsRoot;
+        fieldParent.value = boardsRoot;
+        updatePathHint();
+        setStatus(formStatus, t("status.rootSaved"), "ok");
+        await refreshMeta();
+      } catch (err) {
+        setStatus(formStatus, err.message || String(err), "err");
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById("btn-pick-icon").addEventListener("click", async () => {
+      const btn = document.getElementById("btn-pick-icon");
+      btn.disabled = true;
+      setStatus(formStatus, t("status.pickImage"));
+      try {
+        const data = await api("/api/pick-image", {
+          method: "POST",
+          body: JSON.stringify({
+            initial: fieldIcon.value.trim() || undefined,
+            title: "Icon für Kanban-Board wählen",
+          }),
+        });
+        if (data.cancelled || !data.path) {
+          setStatus(formStatus, t("status.cancelled"));
+          return;
+        }
+        selectedIconId = "";
+        syncGallerySelection();
+        fieldIcon.value = data.path;
+        setIconPreview(data.preview || "");
+        setStatus(formStatus, t("status.iconOwn"), "ok");
+      } catch (err) {
+        setStatus(formStatus, err.message || String(err), "err");
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById("btn-clear-icon").addEventListener("click", () => {
+      fieldIcon.value = "";
+      selectedIconId = "";
+      setIconPreview("");
+      syncGallerySelection();
+      setStatus(formStatus, t("status.iconCleared"));
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("btn-create");
+      btn.disabled = true;
+      setStatus(formStatus, t("status.creating"));
+      try {
+        const payload = {
+          name: fieldName.value.trim(),
+          slug: fieldSlug.value.trim(),
+          port: fieldPort.value ? Number(fieldPort.value) : 0,
+          parent: fieldParent.value.trim(),
+          iconPath: fieldIcon.value.trim(),
+          iconId: selectedIconId,
+          force: fieldForce.checked,
+          openAfter: fieldOpen.checked,
+          desktopShortcut: fieldDesktop.checked,
+        };
+        const result = await api("/api/boards", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+        let msg = "Angelegt: " + result.title;
+        if (result.shortcut) msg += " · Verknüpfung auf dem Desktop";
+        if (result.opened) msg += " · geöffnet";
+        setStatus(formStatus, msg, "ok");
+        fieldName.value = "";
+        fieldSlug.value = "";
+        fieldPort.value = "";
+        fieldIcon.value = "";
+        selectedIconId = "";
+        setIconPreview("");
+        syncGallerySelection();
+        fieldForce.checked = false;
+        slugTouched = false;
+        updatePathHint();
+        await refreshBoards();
+        await refreshMeta();
+      } catch (err) {
+        setStatus(formStatus, err.message || String(err), "err");
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById("btn-refresh").addEventListener("click", async () => {
+      try {
+        await refreshBoards();
+        await refreshMeta();
+        await refreshIcons();
+      } catch (err) {
+        alert(err.message || String(err));
+      }
+    });
+
+    (async function boot() {
+      try {
+        await refreshMeta();
+        await refreshIcons();
+        await refreshBoards();
+      } catch (err) {
+        boardList.innerHTML = '<div class="empty">' + t("err.api") + '</div>';
+        setStatus(formStatus, err.message || String(err), "err");
+      }
+    })();
+  </script>
+</body>
+</html>

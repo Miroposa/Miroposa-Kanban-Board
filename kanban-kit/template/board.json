@@ -1,0 +1,37 @@
+{
+  "columns": [
+    {
+      "id": "brainstorm",
+      "title": "Brainstorm",
+      "hint": "Freie Ideen",
+      "color": "yellow"
+    },
+    {
+      "id": "backlog",
+      "title": "Backlog",
+      "hint": "Irgendwann / geparkt",
+      "color": "orange"
+    },
+    {
+      "id": "next",
+      "title": "Als Nächstes",
+      "hint": "Konkrete Prioritäten",
+      "color": "blue"
+    },
+    {
+      "id": "ist",
+      "title": "Umgesetzt",
+      "hint": "Was schon fertig ist",
+      "color": "green"
+    }
+  ],
+  "cards": [
+    {
+      "id": "c1",
+      "column": "brainstorm",
+      "title": "Willkommen – erste Idee notieren",
+      "notes": "Diese Karte kannst du löschen oder umbenennen.",
+      "color": "none"
+    }
+  ]
+}

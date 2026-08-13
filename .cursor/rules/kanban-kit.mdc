@@ -1,0 +1,16 @@
+---
+description: Neues lokales Kanban/Brainstorm-Board aus dem Kanban-Kit anlegen
+globs: kanban-kit/**, boards/**
+alwaysApply: false
+---
+
+# Kanban-Kit (neue Projekte)
+
+Wiederverwendbares Grundgerüst unter `kanban-kit/` (Vorlage aus dem Janamathics-Board).
+
+- **Manager-UI:** `kanban-kit/Kanban Manager oeffnen.bat` → http://127.0.0.1:8760/manager.html
+- Dort Boards anlegen, öffnen, löschen (Janamathics nicht löschbar)
+- CLI alternativ: `python kanban-kit/new-board.py --name "Projektname"`
+- Neue Boards: standardmäßig im **Downloads**-Ordner (`Downloads/<slug>/`)
+- Anleitung: `kanban-kit/README.md`
+- Janamathics: `brainstorm/` (Port 8765)

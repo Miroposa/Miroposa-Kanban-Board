@@ -1,0 +1,82 @@
+{
+  "icons": [
+    {
+      "id": "kanban",
+      "label": "Kanban",
+      "png": "kanban.png",
+      "ico": "kanban.ico"
+    },
+    {
+      "id": "sticky",
+      "label": "Notizen",
+      "png": "sticky.png",
+      "ico": "sticky.ico"
+    },
+    {
+      "id": "bulb",
+      "label": "Ideen",
+      "png": "bulb.png",
+      "ico": "bulb.ico"
+    },
+    {
+      "id": "check",
+      "label": "Erledigt",
+      "png": "check.png",
+      "ico": "check.ico"
+    },
+    {
+      "id": "game",
+      "label": "Spiel",
+      "png": "game.png",
+      "ico": "game.ico"
+    },
+    {
+      "id": "star",
+      "label": "Favorit",
+      "png": "star.png",
+      "ico": "star.ico"
+    },
+    {
+      "id": "rocket",
+      "label": "Start",
+      "png": "rocket.png",
+      "ico": "rocket.ico"
+    },
+    {
+      "id": "palette",
+      "label": "Design",
+      "png": "palette.png",
+      "ico": "palette.ico"
+    },
+    {
+      "id": "target",
+      "label": "Ziel",
+      "png": "target.png",
+      "ico": "target.ico"
+    },
+    {
+      "id": "book",
+      "label": "Lernen",
+      "png": "book.png",
+      "ico": "book.ico"
+    },
+    {
+      "id": "puzzle",
+      "label": "Rätsel",
+      "png": "puzzle.png",
+      "ico": "puzzle.ico"
+    },
+    {
+      "id": "heart",
+      "label": "Kids",
+      "png": "heart.png",
+      "ico": "heart.ico"
+    },
+    {
+      "id": "folder",
+      "label": "Ordner",
+      "png": "folder.png",
+      "ico": "folder.ico"
+    }
+  ]
+}

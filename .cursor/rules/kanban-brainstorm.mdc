@@ -1,0 +1,14 @@
+---
+description: Lokales Kanban/Brainstorm-Board für Janamathics-Features nutzen
+globs: brainstorm/**
+alwaysApply: false
+---
+
+# Kanban & Brainstorm (Janamathics)
+
+Feature-Ideen und Roadmap liegen in `brainstorm/janamathics-kanban.html` (lokales Kanban + Flipchart, Autosave in JSON).
+
+- Öffnen: `brainstorm/Kanban oeffnen.bat` (nicht `file://`)
+- Anleitung: `brainstorm/README.md`
+- Bei neuen Features: passende Karten vorschlagen oder Board-JSON aktualisieren (nur wenn der User das will)
+- **Weitere Projekte:** Grundgerüst unter `kanban-kit/` → `python kanban-kit/new-board.py --name "…"`

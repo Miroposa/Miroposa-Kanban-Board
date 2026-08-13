@@ -1,0 +1,99 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "janamathics-kanban",
+  "elements": [
+    {
+      "type": "diamond",
+      "version": 165,
+      "versionNonce": 231506099,
+      "isDeleted": false,
+      "id": "xj_4dZGGvmKZy1k3FCxjZ",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "angle": 0,
+      "x": 685,
+      "y": 232,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "width": 210,
+      "height": 230,
+      "seed": 231960115,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1786637251884,
+      "link": null,
+      "locked": false
+    },
+    {
+      "type": "diamond",
+      "version": 142,
+      "versionNonce": 1784585331,
+      "isDeleted": false,
+      "id": "lXgV1-zKnnzFhdIjSh57H",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "angle": 0,
+      "x": 1007,
+      "y": 247,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "width": 239,
+      "height": 226,
+      "seed": 358687571,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1786637255133,
+      "link": null,
+      "locked": false
+    },
+    {
+      "type": "ellipse",
+      "version": 132,
+      "versionNonce": 1595536189,
+      "isDeleted": false,
+      "id": "EkUZFHDvBuXtDBNhCSYuF",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "angle": 0,
+      "x": 909,
+      "y": 195,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "width": 103,
+      "height": 113,
+      "seed": 1071158803,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1786637442103,
+      "link": null,
+      "locked": false
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#f7f3e8",
+    "gridSize": null
+  },
+  "files": {}
+}

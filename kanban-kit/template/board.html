@@ -1,0 +1,3984 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>__BOARD_TITLE__</title>
+  <link rel="stylesheet" href="theme_shared.css" />
+  <style>
+    :root {
+      --bg: #1f3d2f;
+      --bg-2: #274c3a;
+      --bg-angle: 160deg;
+      --bg-spots: 1;
+      --chalk: #e8f0e6;
+      --ink: #1a241c;
+      --muted: #5c6d60;
+      --paper: #fffdf6;
+      --line: #d7d0bc;
+      --accent: #e2a53a;
+      --ok: #6f9b6a;
+      --danger: #c45c4a;
+      --shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+      --radius: 14px;
+      --font: "Segoe UI", Candara, Calibri, "Trebuchet MS", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: var(--font);
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 20% 10%, rgba(255,255,255, calc(0.06 * var(--bg-spots))), transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(0,0,0, calc(0.18 * var(--bg-spots))), transparent 45%),
+        linear-gradient(var(--bg-angle), var(--bg), var(--bg-2));
+    }
+
+    html.theme-no-spots, html.theme-no-spots body {
+      background: linear-gradient(var(--bg-angle), var(--bg), var(--bg-2));
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 18px 18px 28px;
+      gap: 14px;
+    }
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--chalk);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: clamp(1.4rem, 2.4vw, 2rem);
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
+    header p {
+      margin: 4px 0 0;
+      opacity: 0.85;
+      font-size: 0.95rem;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .search-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      position: relative;
+    }
+
+    .toolbar input[type="search"] {
+      min-width: 180px;
+      padding: 9px 12px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.92);
+      color: var(--ink);
+      outline: none;
+    }
+
+    .filter-btn {
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .filter-btn svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+
+    .filter-btn.active {
+      outline: 2px solid var(--ink);
+      outline-offset: 1px;
+    }
+
+    .filter-dot {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      border: 1.5px solid #fff;
+      background: var(--accent);
+      pointer-events: none;
+    }
+
+    .color-filters {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      z-index: 40;
+      width: max-content;
+      max-width: min(360px, 92vw);
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin: 0;
+      padding: 10px;
+      border-radius: 14px;
+      background: rgba(255,253,246,0.98);
+      border: 1px solid rgba(0,0,0,0.12);
+      box-shadow: 0 10px 28px rgba(0,0,0,0.18);
+    }
+
+    .color-filters.open {
+      display: flex;
+    }
+
+    .export-wrap {
+      position: relative;
+      display: inline-flex;
+    }
+
+    .export-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      z-index: 45;
+      min-width: 170px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 6px;
+      border-radius: 12px;
+      background: rgba(255,253,246,0.98);
+      border: 1px solid rgba(0,0,0,0.12);
+      box-shadow: 0 10px 28px rgba(0,0,0,0.18);
+    }
+
+    .export-menu[hidden] {
+      display: none;
+    }
+
+    .export-menu button {
+      border: 0;
+      background: transparent;
+      text-align: left;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font: inherit;
+      font-size: 0.88rem;
+      font-weight: 650;
+      color: var(--ink);
+      cursor: pointer;
+      box-shadow: none;
+    }
+
+    .export-menu button:hover {
+      background: #efe8d6;
+    }
+
+    .color-filters-label {
+      font-size: 0.82rem;
+      font-weight: 650;
+      color: var(--muted);
+      margin-right: 2px;
+      width: 100%;
+    }
+
+    .color-filter-chip {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      border: 2px solid rgba(0,0,0,0.18);
+      padding: 0;
+      cursor: pointer;
+      box-shadow: none;
+      background: #fff;
+      position: relative;
+    }
+
+    .color-filter-chip.active {
+      outline: 2px solid #1a241c;
+      outline-offset: 2px;
+    }
+
+    .color-filter-chip[data-color="all"],
+    .color-filter-chip.due-chip {
+      width: auto;
+      min-width: 44px;
+      height: auto;
+      min-height: 28px;
+      padding: 4px 10px;
+      font: inherit;
+      font-size: 0.78rem;
+      font-weight: 650;
+      color: var(--ink);
+      background: rgba(255,255,255,0.95);
+    }
+
+    .color-filter-chip[data-color="none"] {
+      background: repeating-conic-gradient(#ddd 0% 25%, #fff 0% 50%) 50% / 10px 10px;
+    }
+
+    .color-filter-chip.due-chip[data-due="overdue"].active {
+      background: #f5d7d2;
+      color: #a83228;
+    }
+
+    .color-filter-chip.due-chip[data-due="today"].active {
+      background: #ffe8a3;
+      color: #6b4a00;
+    }
+
+    button, .file-btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 9px 14px;
+      background: var(--accent);
+      color: #2a1d05;
+      font: inherit;
+      font-weight: 650;
+      cursor: pointer;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.15);
+    }
+
+    button.secondary, .file-btn {
+      background: rgba(255,255,255,0.9);
+      color: var(--ink);
+    }
+
+    /* Toolbar: alle Menüpunkte einheitlich */
+    .toolbar > button,
+    .toolbar > .file-btn {
+      background: rgba(255,255,255,0.92);
+      color: var(--ink);
+      box-shadow: 0 1px 0 rgba(0,0,0,0.12);
+    }
+
+    button:hover, .file-btn:hover { filter: brightness(1.05); }
+    button:active, .file-btn:active { transform: translateY(1px); }
+
+    .file-btn { display: inline-flex; align-items: center; }
+    .file-btn input { display: none; }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      min-height: 1.2em;
+    }
+
+    .status {
+      color: rgba(232,240,230,0.8);
+      font-size: 0.85rem;
+      min-height: 1.2em;
+    }
+
+    .history-btn {
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.18);
+      color: rgba(232,240,230,0.95);
+      box-shadow: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .history-btn:hover:not(:disabled) {
+      background: rgba(255,255,255,0.28);
+      filter: none;
+    }
+
+    .history-btn:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+      align-items: start;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      flex: 1;
+    }
+
+    @media (max-width: 1100px) {
+      .board { grid-template-columns: repeat(auto-fit, minmax(240px, 80vw)); }
+    }
+
+    .column {
+      background: rgba(255, 253, 246, 0.94);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      min-height: 70vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-top: 5px solid #6f9b6a;
+    }
+
+    .column-head {
+      padding: 12px 12px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .column-head-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-col-drag {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      cursor: grab;
+      border-radius: 8px;
+      width: 28px;
+      height: 28px;
+      font-size: 1rem;
+      padding: 0;
+      box-shadow: none;
+      letter-spacing: -1px;
+    }
+
+    .btn-col-drag:active { cursor: grabbing; }
+
+    .btn-col-delete {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      border-radius: 8px;
+      width: 28px;
+      height: 28px;
+      font-size: 0.95rem;
+      padding: 0;
+      box-shadow: none;
+    }
+
+    .btn-col-delete:hover {
+      background: #f5d7d2;
+      color: var(--danger);
+    }
+
+    .column.col-dragging {
+      opacity: 0.45;
+    }
+
+    .column.col-drop-before {
+      box-shadow: -4px 0 0 0 var(--accent), var(--shadow);
+    }
+
+    .column.col-drop-after {
+      box-shadow: 4px 0 0 0 var(--accent), var(--shadow);
+    }
+
+    .column-head h2 {
+      margin: 0;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .count {
+      display: inline-grid;
+      place-items: center;
+      min-width: 1.5rem;
+      height: 1.5rem;
+      padding: 0 6px;
+      border-radius: 999px;
+      background: #efe8d6;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .column-hint {
+      margin: 0;
+      padding: 0 12px 8px;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .cards {
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+      min-height: 120px;
+    }
+
+    .cards.drag-over {
+      background: rgba(226, 165, 58, 0.12);
+      outline: 2px dashed var(--accent);
+      outline-offset: -6px;
+      border-radius: 10px;
+    }
+
+    .card.drop-target {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba(226, 165, 58, 0.25);
+    }
+
+    .card.drop-before {
+      box-shadow: 0 -3px 0 0 var(--accent), 0 2px 0 rgba(0,0,0,0.04);
+    }
+
+    .card.drop-after {
+      box-shadow: 0 3px 0 0 var(--accent), 0 2px 0 rgba(0,0,0,0.04);
+    }
+
+    .card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 10px 8px;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.04);
+      cursor: grab;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+      position: relative;
+    }
+
+    .card.has-color {
+      padding-left: 14px;
+    }
+
+    .card.has-color::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 6px;
+      border-radius: 12px 0 0 12px;
+      background: var(--card-accent, var(--accent));
+    }
+
+    .card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+    }
+
+    .card.dragging {
+      opacity: 0.55;
+      cursor: grabbing;
+    }
+
+    .color-picker {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 4px 0;
+    }
+
+    .color-swatch {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      border: 2px solid rgba(0,0,0,0.15);
+      cursor: pointer;
+      padding: 0;
+      box-shadow: none;
+      position: relative;
+    }
+
+    .color-swatch.selected {
+      outline: 2px solid #1a241c;
+      outline-offset: 2px;
+    }
+
+    .color-swatch[data-color="none"] {
+      background: repeating-conic-gradient(#ddd 0% 25%, #fff 0% 50%) 50% / 10px 10px;
+    }
+
+    .card-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      line-height: 1.35;
+      margin: 0 0 4px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: #142018;
+    }
+
+    .card-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      margin: 0 0 4px;
+    }
+
+    .card-head .card-title {
+      margin: 0;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .card-date {
+      margin: 0;
+      color: #334038;
+      font-size: 0.68rem;
+      font-weight: 650;
+      flex-shrink: 0;
+      text-align: right;
+      white-space: nowrap;
+      line-height: 1.35;
+      padding-top: 2px;
+    }
+
+    .card-notes {
+      margin: 0 0 6px;
+      color: #2a332c;
+      font-size: 0.84rem;
+      font-weight: 500;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .card-notes .note-line {
+      white-space: pre-wrap;
+      margin: 0;
+    }
+
+    .card-notes .note-blank {
+      height: 0.45em;
+    }
+
+    .card-notes .note-check {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 7px;
+      margin: 3px 0;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .card-notes .note-check input {
+      margin: 0.22em 0 0;
+      flex-shrink: 0;
+      width: 0.95em;
+      height: 0.95em;
+      accent-color: #2f6f4e;
+      cursor: pointer;
+    }
+
+    .card-notes .note-check span {
+      flex: 1;
+      min-width: 0;
+      white-space: pre-wrap;
+    }
+
+    .card-notes .note-check.done span {
+      text-decoration: line-through;
+      opacity: 0.62;
+    }
+
+    .card-source-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin: 0 0 6px;
+      padding: 3px 8px;
+      border: 0;
+      border-radius: 999px;
+      background: #efe8d6;
+      color: #3d4a40;
+      font: inherit;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      max-width: 100%;
+      text-align: left;
+    }
+
+    .card-source-link:hover {
+      background: #e5dcc4;
+      color: var(--ink);
+    }
+
+    .card-source-link span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .notes-tools {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin: 0 0 6px;
+    }
+
+    .notes-tools .attach-hint {
+      margin: 0;
+      flex: 1;
+    }
+
+    .notes-tools .btn-check-insert {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #efe8d6;
+      color: var(--ink);
+      font: inherit;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 9px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .notes-tools .btn-check-insert:hover {
+      background: #e5dcc4;
+    }
+
+    .field-notes-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field-notes-wrap > label {
+      font-weight: 700;
+    }
+
+    .card-due {
+      margin: 0;
+      color: #2a332c;
+      font-size: 0.78rem;
+      font-weight: 650;
+      line-height: 1.2;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .card-due.overdue {
+      color: #a83228;
+    }
+
+    .card-due.today {
+      color: #8a5a00;
+    }
+
+    .card.has-color .card-title {
+      color: #101812;
+    }
+
+    .card.has-color .card-date,
+    .card.has-color .card-notes,
+    .card.has-color .card-due {
+      color: #1c2620;
+    }
+
+    .card.has-color .card-due.overdue {
+      color: #a83228;
+    }
+
+    .card.has-color .card-due.today {
+      color: #8a5a00;
+    }
+
+    .card-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+      min-height: 30px;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 6px;
+      opacity: 1;
+      flex-shrink: 0;
+      margin-left: auto;
+      position: relative;
+    }
+
+    .btn-delete {
+      border: 0;
+      border-radius: 999px;
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      background: #f5d7d2;
+      color: #c62828;
+      font: inherit;
+      font-size: 1.05rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    .btn-delete:hover {
+      background: #efc0b8;
+      color: #a11919;
+      filter: none;
+    }
+
+    .btn-card-flip {
+      border: 0;
+      border-radius: 999px;
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      background: #efe8d6;
+      color: var(--muted);
+      font: inherit;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      position: relative;
+      line-height: 1;
+    }
+
+    .btn-card-flip:hover {
+      background: #e5dcc4;
+      filter: none;
+      color: var(--ink);
+    }
+
+    .btn-card-flip.has-content {
+      background: #2f6f4e;
+      color: #f3fff6;
+    }
+
+    .btn-card-flip.has-content:hover {
+      background: #3a855c;
+      color: #fff;
+    }
+
+    .btn-card-flip .dot {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: 0.35;
+      flex: 0 0 auto;
+    }
+
+    .btn-card-flip.has-content .dot {
+      background: #b8f5c8;
+      opacity: 1;
+      box-shadow: 0 0 0 2px rgba(184, 245, 200, 0.35);
+    }
+
+    #btn-flipchart.has-content {
+      background: #2f6f4e;
+      color: #f3fff6;
+      box-shadow: 0 0 0 2px rgba(47, 111, 78, 0.25);
+    }
+
+    #btn-flipchart.has-content:hover {
+      background: #3a855c;
+      color: #fff;
+      filter: none;
+    }
+
+    #btn-card-flip-dialog.has-content {
+      background: #2f6f4e !important;
+      color: #f3fff6 !important;
+    }
+
+    .icon-btn {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      border-radius: 8px;
+      width: 28px;
+      height: 28px;
+      font-size: 0.95rem;
+      padding: 0;
+      box-shadow: none;
+    }
+
+    .icon-btn:hover { background: #efe8d6; color: var(--ink); }
+    .icon-btn.danger:hover { background: #f5d7d2; color: var(--danger); }
+
+    .column-foot {
+      padding: 8px;
+      border-top: 1px solid var(--line);
+    }
+
+    .column-foot button {
+      width: 100%;
+      background: #efe8d6;
+      color: var(--ink);
+      box-shadow: none;
+    }
+
+    dialog {
+      border: 0;
+      border-radius: 16px;
+      padding: 0;
+      width: min(480px, calc(100vw - 24px));
+      box-shadow: var(--shadow);
+    }
+
+    dialog::backdrop { background: rgba(15, 28, 20, 0.55); }
+
+    .dialog-body {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: var(--paper);
+    }
+
+    .dialog-body h3 {
+      margin: 0 0 4px;
+      word-break: break-word;
+      line-height: 1.25;
+    }
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .attach-block {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.55);
+    }
+
+    .attach-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.85rem;
+      font-weight: 650;
+      color: var(--muted);
+    }
+
+    .attach-add {
+      padding: 6px 12px;
+      font-size: 0.8rem;
+    }
+
+    .attach-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 140px;
+      overflow: auto;
+    }
+
+    .attach-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      background: #fff;
+      border: 1px solid var(--line);
+      font-size: 0.82rem;
+      color: var(--ink);
+    }
+
+    .attach-item a {
+      flex: 1;
+      min-width: 0;
+      color: inherit;
+      text-decoration: none;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .attach-item a:hover {
+      text-decoration: underline;
+    }
+
+    .attach-item .attach-remove {
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border-radius: 999px;
+      background: #f5d7d2;
+      color: #c62828;
+      box-shadow: none;
+      font-weight: 800;
+    }
+
+    .attach-hint {
+      margin: 0;
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .btn-card-attach {
+      border: 0;
+      border-radius: 999px;
+      min-width: 30px;
+      height: 30px;
+      padding: 0 8px;
+      background: #efe8d6;
+      color: var(--muted);
+      font: inherit;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      line-height: 1;
+    }
+
+    .btn-card-attach:hover {
+      background: #e5dcc4;
+      color: var(--ink);
+      filter: none;
+    }
+
+    .btn-card-attach .attach-count {
+      font-size: 0.78rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .card-attach-menu {
+      position: absolute;
+      right: 0;
+      bottom: calc(100% + 6px);
+      z-index: 40;
+      min-width: 160px;
+      max-width: 240px;
+      padding: 6px;
+      border-radius: 10px;
+      background: #fffdf6;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .card-attach-menu a {
+      display: block;
+      padding: 6px 8px;
+      border-radius: 7px;
+      color: #1c2620;
+      font-size: 0.78rem;
+      font-weight: 650;
+      text-decoration: none;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .card-attach-menu a:hover {
+      background: #efe8d6;
+    }
+
+    input[type="text"], textarea, select {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font: inherit;
+      color: var(--ink);
+      background: #fff;
+      resize: vertical;
+    }
+
+    .dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+
+    .dialog-actions .dialog-icon-btn {
+      border: 0;
+      border-radius: 999px;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font: inherit;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      line-height: 1;
+      flex-shrink: 0;
+      box-shadow: none;
+    }
+
+    .dialog-actions .dialog-icon-btn:hover {
+      filter: brightness(0.97);
+    }
+
+    #btn-delete-card.dialog-icon-btn {
+      margin-right: auto;
+      background: #f5d7d2;
+      color: #c45c4a;
+    }
+
+    #btn-copy-card.dialog-icon-btn {
+      background: #e8f0e6;
+      color: #2a332c;
+    }
+
+    #btn-card-flip-dialog.dialog-icon-btn {
+      background: #ffe8a3;
+      color: #5d4037;
+      position: relative;
+    }
+
+    #btn-card-flip-dialog.dialog-icon-btn.has-content {
+      background: #2f6f4e !important;
+      color: #f3fff6 !important;
+    }
+
+    #btn-card-flip-dialog.dialog-icon-btn .dot {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #b8f5c8;
+      box-shadow: 0 0 0 2px rgba(184, 245, 200, 0.35);
+    }
+
+    .empty {
+      color: var(--muted);
+      font-size: 0.85rem;
+      text-align: center;
+      padding: 18px 8px;
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+    }
+
+    footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      color: rgba(232,240,230,0.75);
+      font-size: 0.8rem;
+    }
+
+    footer a {
+      color: inherit;
+      font-weight: 650;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    footer a:hover {
+      color: #fff;
+    }
+
+    footer .footer-save {
+      opacity: 0.9;
+      text-align: right;
+      margin-left: auto;
+    }
+
+    body.placing {
+      cursor: copy;
+    }
+
+    body.placing .board {
+      outline: 3px dashed var(--accent);
+      outline-offset: 4px;
+      border-radius: 12px;
+    }
+
+    body.placing .column {
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    body.placing .column:hover,
+    body.placing .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 0 3px rgba(226, 165, 58, 0.55), var(--shadow);
+    }
+
+    .place-banner {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: #fff3bf;
+      color: #3a2e08;
+      font-weight: 650;
+      box-shadow: var(--shadow);
+    }
+
+    body.placing .place-banner { display: flex; }
+
+    .place-ghost {
+      position: fixed;
+      z-index: 9999;
+      pointer-events: none;
+      max-width: 240px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #fff3bf;
+      border: 1px solid #e6d27a;
+      box-shadow: var(--shadow);
+      font-weight: 650;
+      font-size: 0.9rem;
+      opacity: 0.92;
+      transform: translate(12px, 12px) rotate(-2deg);
+    }
+
+    .card.placing-source {
+      outline: 2px dashed var(--accent);
+      opacity: 0.55;
+    }
+
+    .field-column-wrap.hidden { display: none; }
+
+    .flipchart-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      background: #1a241c;
+      flex-direction: column;
+    }
+
+    .flipchart-overlay.open {
+      display: flex;
+    }
+
+    .flipchart-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 10px 14px;
+      background: #274c3a;
+      color: var(--chalk);
+    }
+
+    .flipchart-bar h2 {
+      margin: 0;
+      font-size: 1.05rem;
+    }
+
+    .flipchart-bar .tools {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .flipchart-status {
+      font-size: 0.85rem;
+      opacity: 0.85;
+    }
+
+    #flipchart-root {
+      flex: 1;
+      min-height: 0;
+      background: #f7f3e8;
+    }
+
+    #flipchart-root .excalidraw {
+      height: 100%;
+    }
+  </style>
+  <script>window.EXCALIDRAW_ASSET_PATH = "https://unpkg.com/@excalidraw/excalidraw@0.17.6/dist/";</script>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>__BOARD_TITLE__</h1>
+    </div>
+    <div class="toolbar">
+      <div class="search-wrap">
+        <button
+          type="button"
+          class="secondary filter-btn"
+          id="btn-color-filter"
+          data-i18n-title="board.colorFilter"
+          title="Farbe"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="color-filters"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M3 5.25A1.25 1.25 0 0 1 4.25 4h15.5A1.25 1.25 0 0 1 21 5.25c0 .3-.11.59-.31.81L15 12.9V19a1 1 0 0 1-1.45.89l-3-1.5A1 1 0 0 1 10 17.5v-4.6L3.31 6.06A1.25 1.25 0 0 1 3 5.25Z"/>
+          </svg>
+          <span class="filter-dot" id="color-filter-dot" hidden></span>
+        </button>
+        <div class="color-filters" id="color-filters" role="menu" aria-label="Nach Farbe filtern"></div>
+        <input id="search" type="search" data-i18n-placeholder="board.search" placeholder="Karten suchen…" />
+      </div>
+      <button type="button" class="secondary" id="btn-add" title="Neue Idee" data-i18n="board.addIdea" data-i18n-title="board.addIdea">+ Idee</button>
+      <button type="button" class="secondary" id="btn-add-column" title="Neue Spalte" data-i18n="board.addColumn" data-i18n-title="board.addColumn">+ Spalte</button>
+      <button type="button" class="secondary" id="btn-flipchart" title="Excalidraw Flipchart öffnen" data-i18n="board.flipchart" data-i18n-title="board.flipchart">Flipchart</button>
+      <div class="export-wrap">
+        <button type="button" class="secondary" id="btn-export" data-i18n="board.export" aria-haspopup="true" aria-expanded="false" aria-controls="export-menu">Export</button>
+        <div class="export-menu" id="export-menu" role="menu" hidden>
+          <button type="button" role="menuitem" data-export="json">JSON</button>
+          <button type="button" role="menuitem" data-export="xlsx">Excel (.xlsx)</button>
+          <button type="button" role="menuitem" data-export="docx">Word (.docx)</button>
+          <button type="button" role="menuitem" data-export="pdf">PDF</button>
+          <button type="button" role="menuitem" data-export="png">PNG (Board)</button>
+        </div>
+      </div>
+      <label class="file-btn"><span data-i18n="board.import">Import</span><input id="import" type="file" accept="application/json,.json" /></label>
+      <button type="button" class="secondary" id="btn-settings" title="Hintergrund &amp; Farben" data-i18n="board.settings" data-i18n-title="board.settings">Einstellungen</button>
+    </div>
+  </header>
+  <div class="status-row">
+    <button type="button" class="history-btn" id="btn-undo" title="Zurück" data-i18n-title="board.undo" aria-label="Zurück" disabled>↶</button>
+    <button type="button" class="history-btn" id="btn-redo" title="Vor" data-i18n-title="board.redo" aria-label="Vor" disabled>↷</button>
+    <div class="status" id="status" data-i18n="board.statusAuto">✓ Speichert automatisch in Datei</div>
+  </div>
+  <div class="place-banner" id="place-banner" role="status">
+    <span id="place-banner-text" data-i18n="board.placeHint">Idee angelegt – jetzt auf eine Spalte oder Karte klicken</span>
+    <button type="button" class="secondary" id="btn-cancel-place" data-i18n="board.cancelPlace">Abbrechen (Esc)</button>
+  </div>
+  <main class="board" id="board" aria-label="Kanban Board"></main>
+  <footer>
+    <span class="footer-credit">Made by <a href="https://miroposa.eu/" target="_blank" rel="noopener noreferrer">Miroposa</a></span>
+    <span class="footer-save" id="footer-save-date">Änderungen werden automatisch gespeichert: Stand —</span>
+  </footer>
+
+  <div class="flipchart-overlay" id="flipchart-overlay" aria-hidden="true">
+    <div class="flipchart-bar">
+      <h2 id="flipchart-title">Flipchart (Excalidraw)</h2>
+      <span class="flipchart-status" id="flipchart-status">Bereit</span>
+      <div class="tools">
+        <button type="button" class="secondary" id="btn-flipchart-back" data-i18n="board.flipBack">← Zurück zum Kanban</button>
+      </div>
+    </div>
+    <div id="flipchart-root"></div>
+  </div>
+
+  <dialog id="editor">
+    <form method="dialog" class="dialog-body" id="editor-form">
+      <h3 id="editor-title">Karte bearbeiten</h3>
+      <label>Titel
+        <textarea id="field-title" rows="3" required></textarea>
+      </label>
+      <div class="field-notes-wrap">
+        <label for="field-notes">Notizen (optional)</label>
+        <div class="notes-tools">
+          <p class="attach-hint">Checkliste: <code>[ ]</code> / <code>[x]</code> – auf der Karte anklickbar</p>
+          <button type="button" class="btn-check-insert" id="btn-insert-check">+ Checkpunkt</button>
+        </div>
+        <textarea id="field-notes" rows="5" placeholder="Details…&#10;[ ] Aufgabe&#10;[x] Erledigt"></textarea>
+      </div>
+      <label>Fällig am (optional)
+        <input id="field-due" type="date" />
+      </label>
+      <label class="field-column-wrap" id="field-column-wrap">Spalte
+        <select id="field-column"></select>
+      </label>
+      <label>Farbe
+        <div class="color-picker" id="field-card-color" role="listbox" aria-label="Ideenfarbe"></div>
+      </label>
+      <div class="attach-block">
+        <div class="attach-head">
+          <span>Dateien</span>
+          <label class="file-btn attach-add">
+            <span>+ Datei</span>
+            <input id="field-attach" type="file" multiple />
+          </label>
+        </div>
+        <div class="attach-list" id="field-attach-list"></div>
+        <p class="attach-hint" id="attach-hint">Beliebige Dateien (max. 40&nbsp;MB) – werden im Board-Ordner gespeichert.</p>
+      </div>
+      <div class="dialog-actions">
+        <button type="button" class="dialog-icon-btn" id="btn-delete-card" style="display:none;" title="Löschen" aria-label="Löschen">✕</button>
+        <button type="button" class="dialog-icon-btn" id="btn-copy-card" style="display:none;" title="In anderes Board kopieren" aria-label="Kopieren">⧉</button>
+        <button type="button" class="dialog-icon-btn" id="btn-card-flip-dialog" style="display:none;" title="Flipchart" aria-label="Flipchart"><span aria-hidden="true">📋</span></button>
+        <button type="button" class="secondary" id="btn-cancel" value="cancel">Abbrechen</button>
+        <button type="submit" id="btn-save" value="default">Speichern</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="copy-dialog">
+    <form method="dialog" class="dialog-body" id="copy-form">
+      <h3>Karte in anderes Board kopieren</h3>
+      <p class="attach-hint" id="copy-hint">Eigenständige Kopie mit Verweis zum Original (kein Sync).</p>
+      <label>Zielboard
+        <select id="copy-board" required></select>
+      </label>
+      <label>Spalte im Ziel
+        <select id="copy-column"></select>
+      </label>
+      <label class="checks" style="flex-direction:row;align-items:center;gap:8px;">
+        <input id="copy-open-after" type="checkbox" checked />
+        <span>Zielboard danach öffnen</span>
+      </label>
+      <p class="attach-hint" id="copy-status" hidden></p>
+      <div class="dialog-actions">
+        <button type="button" class="secondary" id="btn-copy-cancel">Abbrechen</button>
+        <button type="submit" id="btn-copy-confirm">Kopieren</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="column-editor">
+    <form method="dialog" class="dialog-body" id="column-form">
+      <h3>Neue Spalte</h3>
+      <label>Name
+        <input id="field-col-title" type="text" required placeholder="z. B. Ideen Park" maxlength="40" />
+      </label>
+      <label>Kurzbeschreibung (optional)
+        <input id="field-col-hint" type="text" placeholder="Was gehört hier rein?" maxlength="80" />
+      </label>
+      <label>Farbe
+        <div class="color-picker" id="field-col-color" role="listbox" aria-label="Spaltenfarbe"></div>
+      </label>
+      <div class="dialog-actions">
+        <button type="button" class="secondary" id="btn-col-cancel">Abbrechen</button>
+        <button type="submit" id="btn-col-save">Anlegen</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="theme-dialog"></dialog>
+
+  <script src="i18n_lib.js"></script>
+  <script src="theme_lib.js"></script>
+  <script>
+    const STORAGE_KEY = "__STORAGE_KEY__";
+    const FILE_HANDLE_DB = "__FILE_HANDLE_DB__";
+    const FILE_HANDLE_STORE = "handles";
+    const FILE_HANDLE_KEY = "autosave";
+    const DEFAULT_FILE_NAME = "__BOARD_JSON__";
+    const BOARD_API = "/__BOARD_JSON__";
+    const BOARD_SLUG = "__BOARD_SLUG__";
+    const BOARD_TITLE = "__BOARD_TITLE__";
+    const BOARD_DIR = "__BOARD_DIR__";
+    const MANAGER_API = "http://127.0.0.1:8760";
+    const IS_FILE_PROTOCOL = location.protocol === "file:";
+    let serverSaveOk = !IS_FILE_PROTOCOL;
+    let diskSaveTimer = null;
+
+    /** @type {FileSystemFileHandle|null} */
+    let fileHandle = null;
+    let fileSaveTimer = null;
+    let fileNameLabel = "";
+
+    const COLOR_OPTIONS = [
+      { id: "none", label: "Standard", accent: "#9a917c", card: "#fffdf6", border: "#cfc6b0" },
+      { id: "yellow", label: "Gelb", accent: "#d4920f", card: "#fff1a8", border: "#e0b020" },
+      { id: "green", label: "Grün", accent: "#3d8a38", card: "#d5efd0", border: "#5fad58" },
+      { id: "blue", label: "Blau", accent: "#3a6fa0", card: "#cfe6fb", border: "#4f91c4" },
+      { id: "orange", label: "Orange", accent: "#d45a18", card: "#ffe0b8", border: "#e07a30" },
+      { id: "brown", label: "Braun", accent: "#6f4a2c", card: "#e8d5be", border: "#a67c52" },
+      { id: "purple", label: "Lila", accent: "#6b4ea0", card: "#ead8f2", border: "#9575cd" },
+      { id: "pink", label: "Rosa", accent: "#c2185b", card: "#f8d0df", border: "#ec407a" },
+      { id: "teal", label: "Türkis", accent: "#00796b", card: "#c8ebe6", border: "#26a69a" },
+    ];
+
+    const DEFAULT_COLUMN_COLOR = {
+      ist: "green",
+      brainstorm: "yellow",
+      backlog: "orange",
+      next: "blue",
+      "in-bearbeitung": "brown",
+    };
+
+    const DEFAULT_COLUMNS = [
+      { id: "brainstorm", title: "Brainstorm", hint: "Freie Ideen", color: "yellow" },
+      { id: "backlog", title: "Backlog", hint: "Irgendwann / geparkt", color: "orange" },
+      { id: "next", title: "Als Nächstes", hint: "Konkrete Prioritäten", color: "blue" },
+      { id: "ist", title: "Umgesetzt", hint: "Was schon fertig ist", color: "green" },
+    ];
+
+    const SEED_CARDS = [
+      { id: "c1", column: "brainstorm", title: "Willkommen – erste Idee notieren", notes: "Diese Karte kannst du löschen oder umbenennen." },
+    ];
+
+    function defaultState() {
+      return {
+        columns: structuredClone(DEFAULT_COLUMNS),
+        cards: structuredClone(SEED_CARDS),
+      };
+    }
+
+    /** @type {{columns: Array<{id:string,title:string,hint:string}>, cards: Array<{id:string,column:string,title:string,notes:string,createdAt?:string}>}} */
+    let state = defaultState();
+    let editId = null;
+    let searchQuery = "";
+    /** @type {string} "all" oder COLOR_OPTIONS.id */
+    let colorFilter = "all";
+    /** @type {string} all|overdue|today|week|none */
+    let dueFilter = "all";
+    /** @type {Date|null} */
+    let lastSaveAt = null;
+    /** @type {Array<{at:number,state:object}>} */
+    let historyPast = [];
+    /** @type {Array<{at:number,state:object}>} */
+    let historyFuture = [];
+    /** @type {object|null} */
+    let committedSnapshot = null;
+    let historyLocked = false;
+    const HISTORY_MAX_MS = 60 * 60 * 1000;
+    /** true = neue Idee nach Speichern per Klick platzieren */
+    let createAndPlace = false;
+    /** @type {string|null} */
+    let placeModeId = null;
+    /** @type {HTMLElement|null} */
+    let placeGhost = null;
+    /** @type {string|null} */
+    let draggingColumnId = null;
+
+    const boardEl = document.getElementById("board");
+    const statusEl = document.getElementById("status");
+    const editor = document.getElementById("editor");
+    const form = document.getElementById("editor-form");
+    const fieldTitle = document.getElementById("field-title");
+    const fieldNotes = document.getElementById("field-notes");
+    const fieldDue = document.getElementById("field-due");
+    const fieldAttach = document.getElementById("field-attach");
+    const fieldAttachList = document.getElementById("field-attach-list");
+    const fieldColumn = document.getElementById("field-column");
+    const fieldColumnWrap = document.getElementById("field-column-wrap");
+    const fieldCardColor = document.getElementById("field-card-color");
+    const fieldColColor = document.getElementById("field-col-color");
+    const btnSave = document.getElementById("btn-save");
+    const placeBannerText = document.getElementById("place-banner-text");
+    let selectedCardColor = "none";
+    let selectedColColor = "yellow";
+    /** @type {Array<object>} */
+    let editorAttachments = [];
+    let attachBusy = false;
+    let copyBusy = false;
+
+    const copyDialog = document.getElementById("copy-dialog");
+    const copyForm = document.getElementById("copy-form");
+    const copyBoardSelect = document.getElementById("copy-board");
+    const copyColumnSelect = document.getElementById("copy-column");
+    const copyOpenAfter = document.getElementById("copy-open-after");
+    const copyStatus = document.getElementById("copy-status");
+
+    function getColor(id) {
+      return COLOR_OPTIONS.find((c) => c.id === id) || COLOR_OPTIONS[0];
+    }
+
+    function buildColorPicker(container, selectedId, onSelect) {
+      container.innerHTML = "";
+      COLOR_OPTIONS.forEach((opt) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "color-swatch" + (opt.id === selectedId ? " selected" : "");
+        btn.dataset.color = opt.id;
+        btn.title = opt.label;
+        btn.setAttribute("aria-label", opt.label);
+        btn.style.background = opt.id === "none" ? "" : opt.accent;
+        btn.addEventListener("click", () => {
+          onSelect(opt.id);
+          buildColorPicker(container, opt.id, onSelect);
+        });
+        container.appendChild(btn);
+      });
+    }
+
+    function bt(key) {
+      return window.KanbanI18n ? window.KanbanI18n.t(key) : key;
+    }
+
+    function cardColorId(card) {
+      return card.color && card.color !== "none" ? card.color : "none";
+    }
+
+    function startOfDay(date) {
+      const d = date instanceof Date ? date : new Date(date);
+      return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    }
+
+    function normalizeDueValue(value) {
+      const raw = String(value || "").trim();
+      if (!raw) return "";
+      if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+      const d = new Date(raw);
+      if (Number.isNaN(d.getTime())) return "";
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return y + "-" + m + "-" + day;
+    }
+
+    function cardDueDate(card) {
+      const iso = normalizeDueValue(card && card.dueDate);
+      if (!iso) return null;
+      return startOfDay(iso + "T12:00:00");
+    }
+
+    function dueStatus(card) {
+      const due = cardDueDate(card);
+      if (!due) return "";
+      const today = startOfDay(new Date());
+      if (due.getTime() < today.getTime()) return "overdue";
+      if (due.getTime() === today.getTime()) return "today";
+      return "upcoming";
+    }
+
+    const CHECK_LINE_RE = /^(\s*)(?:[-*•]\s+)?\[([ xX])\]\s*(.*)$/;
+
+    function toggleChecklistLine(cardId, lineIndex, checked) {
+      const card = state.cards.find((c) => c.id === cardId);
+      if (!card) return;
+      const lines = String(card.notes || "").split("\n");
+      if (lineIndex < 0 || lineIndex >= lines.length) return;
+      if (!CHECK_LINE_RE.test(lines[lineIndex])) return;
+      lines[lineIndex] = lines[lineIndex].replace(/\[[ xX]\]/, checked ? "[x]" : "[ ]");
+      card.notes = lines.join("\n");
+      saveState("Checkliste aktualisiert");
+      render();
+    }
+
+    function renderCardNotes(card) {
+      const wrap = document.createElement("div");
+      wrap.className = "card-notes";
+      const lines = String(card.notes || "").split("\n");
+      for (let idx = 0; idx < lines.length; idx++) {
+        const line = lines[idx];
+        const m = line.match(CHECK_LINE_RE);
+        if (m) {
+          let text = m[3] || "";
+          let consumedNext = false;
+          // Alleinstehendes [ ] / [x] + Text in der nächsten Zeile → nebeneinander
+          if (!String(text).trim() && idx + 1 < lines.length) {
+            const next = lines[idx + 1];
+            if (next && !CHECK_LINE_RE.test(next)) {
+              text = next;
+              consumedNext = true;
+            }
+          }
+          const checked = String(m[2]).toLowerCase() === "x";
+          const label = document.createElement("label");
+          label.className = "note-check" + (checked ? " done" : "");
+          const input = document.createElement("input");
+          input.type = "checkbox";
+          input.checked = checked;
+          input.title = checked ? "Erledigt" : "Offen";
+          input.addEventListener("click", (e) => e.stopPropagation());
+          input.addEventListener("change", (e) => {
+            e.stopPropagation();
+            toggleChecklistLine(card.id, idx, input.checked);
+          });
+          const span = document.createElement("span");
+          span.textContent = text;
+          label.append(input, span);
+          label.addEventListener("click", (e) => e.stopPropagation());
+          wrap.appendChild(label);
+          if (consumedNext) idx += 1;
+          continue;
+        }
+        const row = document.createElement("div");
+        if (!line) {
+          row.className = "note-blank";
+        } else {
+          row.className = "note-line";
+          row.textContent = line;
+        }
+        wrap.appendChild(row);
+      }
+      return wrap;
+    }
+
+    /** Karten mit Fälligkeit oben, chronologisch; ohne Datum behalten ihre Reihenfolge. */
+    function sortCardsByDue(cards) {
+      return cards.slice().sort((a, b) => {
+        const da = cardDueDate(a);
+        const db = cardDueDate(b);
+        if (da && db) {
+          const diff = da.getTime() - db.getTime();
+          if (diff !== 0) return diff;
+          return String(a.id || "").localeCompare(String(b.id || ""));
+        }
+        if (da && !db) return -1;
+        if (!da && db) return 1;
+        return 0;
+      });
+    }
+
+    function matchesColorFilter(card) {
+      if (colorFilter === "all") return true;
+      return cardColorId(card) === colorFilter;
+    }
+
+    function matchesDueFilter(card) {
+      if (dueFilter === "all") return true;
+      const due = cardDueDate(card);
+      if (dueFilter === "none") return !due;
+      if (!due) return false;
+      const today = startOfDay(new Date());
+      if (dueFilter === "overdue") return due.getTime() < today.getTime();
+      if (dueFilter === "today") return due.getTime() === today.getTime();
+      if (dueFilter === "week") {
+        const end = new Date(today);
+        end.setDate(end.getDate() + 7);
+        return due.getTime() >= today.getTime() && due.getTime() <= end.getTime();
+      }
+      return true;
+    }
+
+    function filtersActive() {
+      return colorFilter !== "all" || dueFilter !== "all";
+    }
+
+    function buildColorFilters() {
+      const bar = document.getElementById("color-filters");
+      const btn = document.getElementById("btn-color-filter");
+      const dot = document.getElementById("color-filter-dot");
+      if (!bar) return;
+      const wasOpen = bar.classList.contains("open");
+      bar.innerHTML = "";
+
+      const label = document.createElement("span");
+      label.className = "color-filters-label";
+      label.textContent = bt("board.colorFilter");
+      bar.appendChild(label);
+
+      const allBtn = document.createElement("button");
+      allBtn.type = "button";
+      allBtn.className = "color-filter-chip" + (colorFilter === "all" ? " active" : "");
+      allBtn.dataset.color = "all";
+      allBtn.textContent = bt("board.colorAll");
+      allBtn.title = bt("board.colorAll");
+      allBtn.addEventListener("click", () => {
+        colorFilter = "all";
+        buildColorFilters();
+        render();
+      });
+      bar.appendChild(allBtn);
+
+      COLOR_OPTIONS.forEach((opt) => {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "color-filter-chip" + (colorFilter === opt.id ? " active" : "");
+        chip.dataset.color = opt.id;
+        chip.title = opt.label;
+        chip.setAttribute("aria-label", opt.label);
+        if (opt.id !== "none") chip.style.background = opt.accent;
+        chip.addEventListener("click", () => {
+          colorFilter = colorFilter === opt.id ? "all" : opt.id;
+          buildColorFilters();
+          render();
+        });
+        bar.appendChild(chip);
+      });
+
+      const dueLabel = document.createElement("span");
+      dueLabel.className = "color-filters-label";
+      dueLabel.textContent = bt("board.dueFilter");
+      bar.appendChild(dueLabel);
+
+      const dueOptions = [
+        { id: "all", label: bt("board.colorAll") },
+        { id: "overdue", label: bt("board.dueOverdue") },
+        { id: "today", label: bt("board.dueToday") },
+        { id: "week", label: bt("board.dueWeek") },
+        { id: "none", label: bt("board.dueNone") },
+      ];
+      dueOptions.forEach((opt) => {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "color-filter-chip due-chip" + (dueFilter === opt.id ? " active" : "");
+        chip.dataset.due = opt.id;
+        chip.textContent = opt.label;
+        chip.title = opt.label;
+        chip.addEventListener("click", () => {
+          dueFilter = dueFilter === opt.id ? "all" : opt.id;
+          if (opt.id === "all") dueFilter = "all";
+          buildColorFilters();
+          render();
+        });
+        bar.appendChild(chip);
+      });
+
+      if (btn) {
+        btn.classList.toggle("active", filtersActive());
+        btn.setAttribute("aria-expanded", wasOpen ? "true" : "false");
+      }
+      if (dot) {
+        if (filtersActive()) {
+          dot.hidden = false;
+          if (colorFilter !== "all") {
+            const c = getColor(colorFilter);
+            dot.style.background = colorFilter === "none" ? "#9a917c" : c.accent;
+          } else if (dueFilter === "overdue") {
+            dot.style.background = "#a83228";
+          } else if (dueFilter === "today") {
+            dot.style.background = "#e2a53a";
+          } else {
+            dot.style.background = "var(--accent)";
+          }
+        } else {
+          dot.hidden = true;
+        }
+      }
+      if (wasOpen) bar.classList.add("open");
+    }
+
+    function setColorFilterOpen(open) {
+      const bar = document.getElementById("color-filters");
+      const btn = document.getElementById("btn-color-filter");
+      if (!bar || !btn) return;
+      bar.classList.toggle("open", open);
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+    }
+
+    function columns() {
+      return state.columns || [];
+    }
+
+    function refreshColumnSelect(selected) {
+      const current = selected || fieldColumn.value;
+      fieldColumn.innerHTML = "";
+      columns().forEach((col) => {
+        const opt = document.createElement("option");
+        opt.value = col.id;
+        opt.textContent = col.title;
+        fieldColumn.appendChild(opt);
+      });
+      if ([...fieldColumn.options].some((o) => o.value === current)) {
+        fieldColumn.value = current;
+      } else if (fieldColumn.options.length) {
+        fieldColumn.value = fieldColumn.options[0].value;
+      }
+    }
+
+    function fallbackColumnId(exceptId) {
+      const cols = columns().filter((c) => c.id !== exceptId);
+      const prefer = cols.find((c) => c.id === "brainstorm") || cols.find((c) => c.id === "ist") || cols[0];
+      return prefer ? prefer.id : null;
+    }
+
+    function uid() {
+      return "c_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return defaultState();
+        const parsed = JSON.parse(raw);
+        return normalizeState(parsed);
+      } catch {
+        return defaultState();
+      }
+    }
+
+    function supportsFileAutosave() {
+      return typeof window.showSaveFilePicker === "function";
+    }
+
+    function openHandleDb() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(FILE_HANDLE_DB, 1);
+        req.onupgradeneeded = () => {
+          const db = req.result;
+          if (!db.objectStoreNames.contains(FILE_HANDLE_STORE)) {
+            db.createObjectStore(FILE_HANDLE_STORE);
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function storeFileHandle(handle) {
+      const db = await openHandleDb();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(FILE_HANDLE_STORE, "readwrite");
+        tx.objectStore(FILE_HANDLE_STORE).put(handle, FILE_HANDLE_KEY);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+      db.close();
+    }
+
+    async function loadStoredFileHandle() {
+      try {
+        const db = await openHandleDb();
+        const handle = await new Promise((resolve, reject) => {
+          const tx = db.transaction(FILE_HANDLE_STORE, "readonly");
+          const req = tx.objectStore(FILE_HANDLE_STORE).get(FILE_HANDLE_KEY);
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror = () => reject(req.error);
+        });
+        db.close();
+        return handle || null;
+      } catch {
+        return null;
+      }
+    }
+
+    async function ensureFilePermission(handle, mode) {
+      const opts = { mode: mode || "readwrite" };
+      if ((await handle.queryPermission(opts)) === "granted") return true;
+      if ((await handle.requestPermission(opts)) === "granted") return true;
+      return false;
+    }
+
+    async function writeStateToFile() {
+      if (!fileHandle) return;
+      try {
+        if (!(await ensureFilePermission(fileHandle, "readwrite"))) {
+          statusEl.textContent = "Datei-Autosave: Bitte erneut „Datei-Autosave“ klicken (Rechte fehlen)";
+          return;
+        }
+        const writable = await fileHandle.createWritable();
+        await writable.write(JSON.stringify(state, null, 2));
+        await writable.close();
+      } catch (err) {
+        statusEl.textContent = "Datei-Autosave fehlgeschlagen: " + (err && err.message ? err.message : err);
+      }
+    }
+
+    function queueFileSave() {
+      if (!fileHandle) return;
+      clearTimeout(fileSaveTimer);
+      fileSaveTimer = setTimeout(() => {
+        writeStateToFile();
+      }, 250);
+    }
+
+    async function loadFromDisk() {
+      if (IS_FILE_PROTOCOL) return null;
+      try {
+        const res = await fetch(BOARD_API, { cache: "no-store" });
+        if (!res.ok) return null;
+        const parsed = await res.json();
+        if (!parsed || !Array.isArray(parsed.cards)) return null;
+        serverSaveOk = true;
+        return parsed;
+      } catch {
+        return null;
+      }
+    }
+
+    function formatSaveStamp(date) {
+      const d = date instanceof Date ? date : new Date(date);
+      const lang = window.KanbanI18n && window.KanbanI18n.getLang
+        ? window.KanbanI18n.getLang()
+        : "de";
+      const locale = lang === "en" ? "en-GB" : "de-DE";
+      const day = d.toLocaleDateString(locale, {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      });
+      const time = d.toLocaleTimeString(locale, {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      if (lang === "en") return day + " – " + time;
+      return day + " – " + time + " Uhr";
+    }
+
+    function updateFooterSaveDate(date) {
+      const el = document.getElementById("footer-save-date");
+      if (!el) return;
+      if (date) lastSaveAt = date instanceof Date ? date : new Date(date);
+      const stamp = lastSaveAt ? formatSaveStamp(lastSaveAt) : "—";
+      const prefix = window.KanbanI18n
+        ? window.KanbanI18n.t("board.saveStand")
+        : "Änderungen werden automatisch gespeichert: Stand";
+      el.textContent = prefix + " " + stamp;
+    }
+
+    function queueDiskSave() {
+      if (IS_FILE_PROTOCOL) return;
+      clearTimeout(diskSaveTimer);
+      diskSaveTimer = setTimeout(async () => {
+        try {
+          const res = await fetch(BOARD_API, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(state),
+          });
+          const data = await res.json().catch(() => ({}));
+          serverSaveOk = res.ok && data.ok !== false;
+          if (!serverSaveOk) {
+            statusEl.textContent = "⚠ Speichern in Datei fehlgeschlagen – bitte über „Kanban oeffnen.bat“ starten";
+          } else {
+            updateFooterSaveDate(new Date());
+          }
+        } catch {
+          serverSaveOk = false;
+          statusEl.textContent = "⚠ Kein Kanban-Server – bitte Desktop-Verknüpfung / BAT nutzen";
+        }
+      }, 200);
+    }
+
+    function cloneBoardState(src) {
+      return JSON.parse(JSON.stringify(src || state));
+    }
+
+    function pruneHistoryQuiet() {
+      const cutoff = Date.now() - HISTORY_MAX_MS;
+      historyPast = historyPast.filter((e) => e && e.at >= cutoff);
+      historyFuture = historyFuture.filter((e) => e && e.at >= cutoff);
+    }
+
+    function updateHistoryButtons() {
+      pruneHistoryQuiet();
+      const undoBtn = document.getElementById("btn-undo");
+      const redoBtn = document.getElementById("btn-redo");
+      if (undoBtn) undoBtn.disabled = historyPast.length === 0;
+      if (redoBtn) redoBtn.disabled = historyFuture.length === 0;
+    }
+
+    function markHistoryBaseline() {
+      committedSnapshot = cloneBoardState(state);
+      updateHistoryButtons();
+    }
+
+    function applyHistoryState(entry, msg) {
+      historyLocked = true;
+      state = normalizeState(cloneBoardState(entry.state));
+      saveState(msg, { skipHistory: true });
+      historyLocked = false;
+      refreshColumnSelect();
+      render();
+      updateHistoryButtons();
+    }
+
+    function undoHistory() {
+      pruneHistoryQuiet();
+      if (!historyPast.length) {
+        updateHistoryButtons();
+        return;
+      }
+      historyFuture.push({ at: Date.now(), state: cloneBoardState(state) });
+      const entry = historyPast.pop();
+      applyHistoryState(entry, "Rückgängig");
+    }
+
+    function redoHistory() {
+      pruneHistoryQuiet();
+      if (!historyFuture.length) {
+        updateHistoryButtons();
+        return;
+      }
+      historyPast.push({ at: Date.now(), state: cloneBoardState(state) });
+      const entry = historyFuture.pop();
+      applyHistoryState(entry, "Wiederholt");
+    }
+
+    function saveState(msg, opts) {
+      const skipHistory = !!(opts && opts.skipHistory) || historyLocked;
+      if (!skipHistory) {
+        if (committedSnapshot) {
+          historyPast.push({ at: Date.now(), state: committedSnapshot });
+          historyFuture = [];
+          pruneHistoryQuiet();
+          if (historyPast.length > 80) historyPast = historyPast.slice(-80);
+        }
+      }
+      committedSnapshot = cloneBoardState(state);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      queueFileSave();
+      queueDiskSave();
+      const now = new Date();
+      updateFooterSaveDate(now);
+      updateHistoryButtons();
+      const t =
+        now.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) +
+        " Uhr";
+      if (IS_FILE_PROTOCOL) {
+        statusEl.textContent =
+          "⚠ Nur Browser-Speicher (unsicher) · bitte über Desktop-Verknüpfung öffnen · " + t;
+        return;
+      }
+      const where = serverSaveOk ? "" : " · warte auf Datei-Speicher…";
+      statusEl.textContent = "✓ " + (msg || "Automatisch gespeichert") + " · " + t + where;
+    }
+
+    async function connectAutosaveFile() {
+      if (!supportsFileAutosave()) {
+        alert(
+          "Datei-Autosave braucht Chrome oder Edge und am besten den Start über „Kanban oeffnen.bat“ (localhost).\n\n" +
+            "Im Browser wird trotzdem schon automatisch gespeichert – du brauchst keinen Extra-Klick."
+        );
+        return;
+      }
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: DEFAULT_FILE_NAME,
+          types: [{ description: "Kanban JSON", accept: { "application/json": [".json"] } }],
+        });
+        fileHandle = handle;
+        fileNameLabel = handle.name || DEFAULT_FILE_NAME;
+        await storeFileHandle(handle);
+        await writeStateToFile();
+        saveState("Datei-Autosave aktiv");
+      } catch (err) {
+        if (err && err.name === "AbortError") return;
+        alert("Datei-Autosave nicht möglich: " + (err && err.message ? err.message : err));
+      }
+    }
+
+    async function restoreAutosaveFile() {
+      if (!supportsFileAutosave()) return;
+      const handle = await loadStoredFileHandle();
+      if (!handle) return;
+      try {
+        if (!(await ensureFilePermission(handle, "readwrite"))) return;
+        fileHandle = handle;
+        fileNameLabel = handle.name || DEFAULT_FILE_NAME;
+        statusEl.textContent = "✓ Automatisch gespeichert";
+      } catch {
+        /* ignore */
+      }
+    }
+
+    function render() {
+      const q = searchQuery.trim().toLowerCase();
+      boardEl.innerHTML = "";
+
+      columns().forEach((col) => {
+        const cards = state.cards.filter((c) => c.column === col.id);
+        const visible = sortCardsByDue(
+          cards.filter((c) => {
+            if (!matchesColorFilter(c)) return false;
+            if (!matchesDueFilter(c)) return false;
+            if (!q) return true;
+            return (c.title + " " + (c.notes || "")).toLowerCase().includes(q);
+          })
+        );
+
+        const column = document.createElement("section");
+        column.className = "column";
+        column.dataset.id = col.id;
+        const colColor = getColor(col.color || DEFAULT_COLUMN_COLOR[col.id] || "none");
+        column.style.borderTopColor = colColor.accent;
+
+        const head = document.createElement("div");
+        head.className = "column-head";
+
+        const titleWrap = document.createElement("h2");
+        titleWrap.innerHTML =
+          col.title + ' <span class="count">' + visible.length + "</span>";
+
+        const headActions = document.createElement("div");
+        headActions.className = "column-head-actions";
+
+        const colDrag = document.createElement("button");
+        colDrag.type = "button";
+        colDrag.className = "btn-col-drag";
+        colDrag.title = "Spalte verschieben";
+        colDrag.setAttribute("aria-label", "Spalte verschieben");
+        colDrag.textContent = "⠿";
+        colDrag.draggable = !placeModeId;
+        colDrag.addEventListener("dragstart", (e) => {
+          if (placeModeId) {
+            e.preventDefault();
+            return;
+          }
+          e.stopPropagation();
+          draggingColumnId = col.id;
+          column.classList.add("col-dragging");
+          e.dataTransfer.setData("text/column-id", col.id);
+          e.dataTransfer.setData("text/plain", "column:" + col.id);
+          e.dataTransfer.effectAllowed = "move";
+        });
+        colDrag.addEventListener("dragend", () => {
+          draggingColumnId = null;
+          column.classList.remove("col-dragging");
+          clearColumnDropHints();
+        });
+
+        const colDel = document.createElement("button");
+        colDel.type = "button";
+        colDel.className = "btn-col-delete";
+        colDel.title = "Spalte löschen";
+        colDel.setAttribute("aria-label", "Spalte löschen");
+        colDel.textContent = "🗑";
+        colDel.addEventListener("click", (e) => {
+          e.stopPropagation();
+          deleteColumn(col.id);
+        });
+
+        headActions.append(colDrag, colDel);
+        head.append(titleWrap, headActions);
+        column.appendChild(head);
+
+        column.addEventListener("dragover", (e) => {
+          if (!draggingColumnId) return;
+          e.preventDefault();
+          e.stopPropagation();
+          e.dataTransfer.dropEffect = "move";
+          const rect = column.getBoundingClientRect();
+          const before = e.clientX < rect.left + rect.width / 2;
+          clearColumnDropHints();
+          column.classList.add(before ? "col-drop-before" : "col-drop-after");
+        });
+        column.addEventListener("dragleave", (e) => {
+          if (!column.contains(e.relatedTarget)) {
+            column.classList.remove("col-drop-before", "col-drop-after");
+          }
+        });
+        column.addEventListener("drop", (e) => {
+          if (!draggingColumnId && !e.dataTransfer.getData("text/column-id")) return;
+          const fromId = e.dataTransfer.getData("text/column-id") || draggingColumnId;
+          if (!fromId) return;
+          e.preventDefault();
+          e.stopPropagation();
+          const rect = column.getBoundingClientRect();
+          const before = e.clientX < rect.left + rect.width / 2;
+          clearColumnDropHints();
+          moveColumn(fromId, col.id, before ? "before" : "after");
+        });
+
+        const hint = document.createElement("p");
+        hint.className = "column-hint";
+        hint.textContent = col.hint || "Ziehen am ⠿ zum Verschieben";
+        column.appendChild(hint);
+
+        const list = document.createElement("div");
+        list.className = "cards";
+        list.dataset.column = col.id;
+
+        list.addEventListener("dragover", (e) => {
+          if (draggingColumnId) return;
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "move";
+          list.classList.add("drag-over");
+        });
+        list.addEventListener("dragleave", (e) => {
+          if (!list.contains(e.relatedTarget)) list.classList.remove("drag-over");
+        });
+        list.addEventListener("drop", (e) => {
+          e.preventDefault();
+          list.classList.remove("drag-over");
+          if (placeModeId || draggingColumnId) return;
+          const id = e.dataTransfer.getData("text/card-id");
+          if (!id) return;
+          // Wenn direkt auf eine Karte gedroppt wurde, übernimmt die Karte den Drop
+          if (e.target.closest && e.target.closest(".card")) return;
+          moveCard(id, col.id);
+        });
+
+        list.addEventListener("click", (e) => {
+          if (!placeModeId) return;
+          if (e.target.closest && e.target.closest(".card")) return;
+          finishPlace(col.id);
+        });
+
+        column.addEventListener("click", (e) => {
+          if (!placeModeId) return;
+          if (e.target.closest(".column-head") || e.target.closest(".column-hint") || e.target.closest(".column-foot")) {
+            finishPlace(col.id);
+          }
+        });
+
+        if (!visible.length) {
+          const empty = document.createElement("div");
+          empty.className = "empty";
+          empty.textContent = placeModeId
+            ? "Hier klicken, um die Idee abzulegen"
+            : q
+              ? "Keine Treffer"
+              : "Zieh Ideen hierher oder + Idee";
+          empty.addEventListener("click", () => {
+            if (placeModeId) finishPlace(col.id);
+          });
+          list.appendChild(empty);
+        }
+
+        visible.forEach((card) => list.appendChild(renderCard(card)));
+        column.appendChild(list);
+
+        const foot = document.createElement("div");
+        foot.className = "column-foot";
+        const addBtn = document.createElement("button");
+        addBtn.type = "button";
+        addBtn.textContent = "+ Idee";
+        addBtn.addEventListener("click", () => openEditor(null, col.id));
+        foot.appendChild(addBtn);
+        column.appendChild(foot);
+
+        boardEl.appendChild(column);
+      });
+    }
+
+    function clearDropHints() {
+      document.querySelectorAll(".card.drop-target, .card.drop-before, .card.drop-after, .cards.drag-over").forEach((el) => {
+        el.classList.remove("drop-target", "drop-before", "drop-after", "drag-over");
+      });
+    }
+
+    function clearColumnDropHints() {
+      document.querySelectorAll(".column.col-drop-before, .column.col-drop-after, .column.col-dragging").forEach((el) => {
+        el.classList.remove("col-drop-before", "col-drop-after", "col-dragging");
+      });
+    }
+
+    function moveColumn(fromId, toId, place) {
+      if (!fromId || !toId || fromId === toId) {
+        draggingColumnId = null;
+        return;
+      }
+      const fromIdx = state.columns.findIndex((c) => c.id === fromId);
+      const toIdx = state.columns.findIndex((c) => c.id === toId);
+      if (fromIdx < 0 || toIdx < 0) {
+        draggingColumnId = null;
+        return;
+      }
+      const [col] = state.columns.splice(fromIdx, 1);
+      let insertAt = state.columns.findIndex((c) => c.id === toId);
+      if (insertAt < 0) insertAt = state.columns.length;
+      if (place === "after") insertAt += 1;
+      state.columns.splice(insertAt, 0, col);
+      draggingColumnId = null;
+      saveState("Spalte verschoben");
+      render();
+    }
+
+    function renderCard(card) {
+      const el = document.createElement("article");
+      el.className = "card";
+      if (placeModeId && card.id === placeModeId) el.classList.add("placing-source");
+      el.draggable = !placeModeId;
+      el.dataset.id = card.id;
+      const cardColor = getColor(card.color || "none");
+      if (card.color && card.color !== "none") {
+        el.classList.add("has-color");
+        el.style.background = cardColor.card;
+        el.style.borderColor = cardColor.border;
+        el.style.setProperty("--card-accent", cardColor.accent);
+      }
+
+      el.addEventListener("dragstart", (e) => {
+        if (placeModeId) {
+          e.preventDefault();
+          return;
+        }
+        el.classList.add("dragging");
+        e.dataTransfer.setData("text/card-id", card.id);
+        e.dataTransfer.effectAllowed = "move";
+      });
+      el.addEventListener("dragend", () => {
+        el.classList.remove("dragging");
+        clearDropHints();
+      });
+      el.addEventListener("dblclick", () => {
+        if (placeModeId) return;
+        openEditor(card.id);
+      });
+
+      el.addEventListener("click", (e) => {
+        if (!placeModeId) return;
+        e.stopPropagation();
+        if (card.id === placeModeId) return;
+        const rect = el.getBoundingClientRect();
+        const before = e.clientY < rect.top + rect.height / 2;
+        finishPlace(card.column, card.id, before ? "before" : "after");
+      });
+
+      // Idee direkt auf eine Karte / Position in der Spalte ziehen
+      el.addEventListener("dragover", (e) => {
+        if (placeModeId || draggingColumnId) return;
+        e.preventDefault();
+        e.stopPropagation();
+        e.dataTransfer.dropEffect = "move";
+        const rect = el.getBoundingClientRect();
+        const before = e.clientY < rect.top + rect.height / 2;
+        clearDropHints();
+        el.classList.add("drop-target", before ? "drop-before" : "drop-after");
+        el.parentElement?.classList.add("drag-over");
+      });
+      el.addEventListener("dragleave", (e) => {
+        if (!el.contains(e.relatedTarget)) {
+          el.classList.remove("drop-target", "drop-before", "drop-after");
+        }
+      });
+      el.addEventListener("drop", (e) => {
+        if (placeModeId || draggingColumnId) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const id = e.dataTransfer.getData("text/card-id");
+        const rect = el.getBoundingClientRect();
+        const before = e.clientY < rect.top + rect.height / 2;
+        clearDropHints();
+        moveCard(id, card.column, card.id, before ? "before" : "after");
+      });
+
+      const head = document.createElement("div");
+      head.className = "card-head";
+
+      const title = document.createElement("p");
+      title.className = "card-title";
+      title.textContent = card.title;
+      head.appendChild(title);
+
+      const dateEl = document.createElement("p");
+      dateEl.className = "card-date";
+      dateEl.textContent = "Erstellt: " + formatCardDate(card.createdAt);
+      head.appendChild(dateEl);
+      el.appendChild(head);
+
+      if (card.notes) {
+        el.appendChild(renderCardNotes(card));
+      }
+
+      if (card.sourceLink && card.sourceLink.boardSlug && card.sourceLink.cardId) {
+        const linkBtn = document.createElement("button");
+        linkBtn.type = "button";
+        linkBtn.className = "card-source-link";
+        const label =
+          "Original: " +
+          (card.sourceLink.boardTitle || card.sourceLink.boardSlug) +
+          (card.sourceLink.cardTitle ? " · " + card.sourceLink.cardTitle : "");
+        linkBtn.title = "Originalkarte in anderem Board öffnen";
+        linkBtn.innerHTML = '<span aria-hidden="true">↗</span><span></span>';
+        linkBtn.querySelector("span:last-child").textContent = label;
+        linkBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openLinkedSource(card.sourceLink);
+        });
+        el.appendChild(linkBtn);
+      }
+
+      const files = Array.isArray(card.attachments) ? card.attachments : [];
+
+      const meta = document.createElement("div");
+      meta.className = "card-meta";
+
+      const dueIso = normalizeDueValue(card.dueDate);
+      if (dueIso) {
+        const dueEl = document.createElement("p");
+        const status = dueStatus(card);
+        dueEl.className = "card-due" + (status ? " " + status : "");
+        dueEl.textContent = "Fällig am " + formatCardDate(dueIso);
+        meta.appendChild(dueEl);
+      }
+
+      const actions = document.createElement("div");
+      actions.className = "card-actions";
+
+      const editBtn = document.createElement("button");
+      editBtn.type = "button";
+      editBtn.className = "icon-btn";
+      editBtn.title = "Bearbeiten";
+      editBtn.setAttribute("aria-label", "Bearbeiten");
+      editBtn.textContent = "✎";
+      editBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openEditor(card.id);
+      });
+
+      let attachBtn = null;
+      if (files.length) {
+        attachBtn = document.createElement("button");
+        attachBtn.type = "button";
+        attachBtn.className = "btn-card-attach";
+        const names = files.map((a) => a.name || "Datei");
+        attachBtn.title = names.join("\n");
+        attachBtn.setAttribute(
+          "aria-label",
+          files.length === 1 ? "1 Datei" : files.length + " Dateien"
+        );
+        attachBtn.innerHTML =
+          '<span aria-hidden="true">📎</span><span class="attach-count"></span>';
+        attachBtn.querySelector(".attach-count").textContent = String(files.length);
+        attachBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const existing = actions.querySelector(".card-attach-menu");
+          if (existing) {
+            existing.remove();
+            return;
+          }
+          document.querySelectorAll(".card-attach-menu").forEach((n) => n.remove());
+          if (files.length === 1) {
+            const url = files[0].url || ("/attachments/" + (files[0].stored || ""));
+            if (url) window.open(url, "_blank", "noopener,noreferrer");
+            return;
+          }
+          const menu = document.createElement("div");
+          menu.className = "card-attach-menu";
+          menu.addEventListener("click", (ev) => ev.stopPropagation());
+          files.forEach((att) => {
+            const link = document.createElement("a");
+            link.href = att.url || ("/attachments/" + (att.stored || ""));
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            link.textContent = att.name || "Datei";
+            menu.appendChild(link);
+          });
+          actions.appendChild(menu);
+        });
+      }
+
+      const flipFilled = flipchartHasContent(card.id);
+      const flipBtn = document.createElement("button");
+      flipBtn.type = "button";
+      flipBtn.className = "btn-card-flip" + (flipFilled ? " has-content" : "");
+      flipBtn.title = flipFilled
+        ? "Flipchart hat Inhalt – öffnen"
+        : "Flipchart öffnen";
+      flipBtn.setAttribute("aria-label", "Flipchart");
+      flipBtn.innerHTML =
+        '<span class="flip-icon" aria-hidden="true">📋</span>' +
+        (flipFilled ? '<span class="dot" aria-hidden="true"></span>' : "");
+      flipBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openFlipchart(card.id, card.title);
+      });
+
+      const delBtn = document.createElement("button");
+      delBtn.type = "button";
+      delBtn.className = "btn-delete";
+      delBtn.title = "Karte löschen";
+      delBtn.setAttribute("aria-label", "Löschen");
+      delBtn.textContent = "✕";
+      delBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        deleteCard(card.id);
+      });
+
+      actions.append(editBtn);
+      if (attachBtn) actions.appendChild(attachBtn);
+      actions.append(flipBtn, delBtn);
+      meta.appendChild(actions);
+      el.appendChild(meta);
+      return el;
+    }
+
+    function deleteCard(id) {
+      const card = state.cards.find((c) => c.id === id);
+      if (!card) return;
+      if (!confirm("Karte löschen?\n\n„" + card.title + "“")) return;
+      state.cards = state.cards.filter((c) => c.id !== id);
+      saveState("Karte gelöscht");
+      render();
+    }
+
+    function deleteColumn(columnId) {
+      if (columns().length <= 1) {
+        alert("Die letzte Spalte kann nicht gelöscht werden.");
+        return;
+      }
+      const col = columns().find((c) => c.id === columnId);
+      if (!col) return;
+      const count = state.cards.filter((c) => c.column === columnId).length;
+      const targetId = fallbackColumnId(columnId);
+      const target = columns().find((c) => c.id === targetId);
+      const msg =
+        count > 0
+          ? "Spalte „" +
+            col.title +
+            "“ löschen?\n\n" +
+            count +
+            " Karte(n) werden nach „" +
+            (target?.title || targetId) +
+            "“ verschoben."
+          : "Spalte „" + col.title + "“ löschen?";
+      if (!confirm(msg)) return;
+
+      state.cards.forEach((c) => {
+        if (c.column === columnId) c.column = targetId;
+      });
+      state.columns = state.columns.filter((c) => c.id !== columnId);
+      refreshColumnSelect();
+      saveState("Spalte gelöscht");
+      render();
+    }
+
+    function slugifyColumnId(title) {
+      const base =
+        String(title)
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "")
+          .slice(0, 24) || "spalte";
+      let id = base;
+      let n = 2;
+      const used = new Set(columns().map((c) => c.id));
+      while (used.has(id)) {
+        id = base + "-" + n;
+        n += 1;
+      }
+      return id;
+    }
+
+    function openColumnEditor() {
+      if (placeModeId) return;
+      document.getElementById("field-col-title").value = "";
+      document.getElementById("field-col-hint").value = "";
+      selectedColColor = "yellow";
+      buildColorPicker(fieldColColor, selectedColColor, (id) => {
+        selectedColColor = id;
+      });
+      document.getElementById("column-editor").showModal();
+      document.getElementById("field-col-title").focus();
+    }
+
+    function addColumn(title, hint, colorId) {
+      const name = String(title || "").trim();
+      if (!name) return;
+      const col = {
+        id: slugifyColumnId(name),
+        title: name,
+        hint: String(hint || "").trim(),
+        color: colorId || "yellow",
+      };
+      state.columns.push(col);
+      refreshColumnSelect(col.id);
+      saveState("Spalte angelegt");
+      render();
+    }
+
+    function formatCardDate(iso) {
+      if (!iso) return "–";
+      const raw = String(iso).trim();
+      const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(raw);
+      const d = new Date(dateOnly ? raw + "T12:00:00" : raw);
+      if (Number.isNaN(d.getTime())) return "–";
+      const date = d.toLocaleDateString("de-DE", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+      if (dateOnly) return date;
+      const time = d.toLocaleTimeString("de-DE", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      return date + ", " + time + " Uhr";
+    }
+
+    function nowIsoDate() {
+      return new Date().toISOString();
+    }
+
+    function normalizeState(data) {
+      if (!data || typeof data !== "object") return defaultState();
+      if (!Array.isArray(data.cards)) data.cards = structuredClone(SEED_CARDS);
+      if (!Array.isArray(data.columns) || !data.columns.length) {
+        data.columns = structuredClone(DEFAULT_COLUMNS);
+      }
+      data.columns = data.columns
+        .filter((c) => c && c.id && c.title)
+        .map((c) => ({
+          id: String(c.id),
+          title: String(c.title),
+          hint: c.hint ? String(c.hint) : "",
+          color: c.color || DEFAULT_COLUMN_COLOR[c.id] || "none",
+        }));
+      if (!data.columns.length) data.columns = structuredClone(DEFAULT_COLUMNS);
+
+      const valid = new Set(data.columns.map((c) => c.id));
+      const fallback = data.columns.find((c) => c.id === "ist")?.id || data.columns[0].id;
+      for (const card of data.cards) {
+        if (card.column === "done" || !valid.has(card.column)) {
+          card.column = fallback;
+        }
+        delete card.tag;
+        if (!card.color) card.color = "none";
+        card.dueDate = normalizeDueValue(card.dueDate);
+        if (!Array.isArray(card.attachments)) card.attachments = [];
+        card.attachments = card.attachments
+          .filter((a) => a && (a.url || a.stored || a.name))
+          .map((a) => ({
+            id: String(a.id || ""),
+            name: String(a.name || "Datei"),
+            stored: String(a.stored || ""),
+            url: String(a.url || (a.stored ? "/attachments/" + a.stored : "")),
+            mime: String(a.mime || "application/octet-stream"),
+            size: Number(a.size) || 0,
+            addedAt: a.addedAt || "",
+          }));
+        if (card.sourceLink && typeof card.sourceLink === "object") {
+          card.sourceLink = {
+            boardSlug: String(card.sourceLink.boardSlug || ""),
+            boardTitle: String(card.sourceLink.boardTitle || card.sourceLink.boardSlug || ""),
+            cardId: String(card.sourceLink.cardId || ""),
+            cardTitle: String(card.sourceLink.cardTitle || ""),
+            port: Number(card.sourceLink.port) || 0,
+          };
+          if (!card.sourceLink.boardSlug || !card.sourceLink.cardId) {
+            delete card.sourceLink;
+          }
+        } else {
+          delete card.sourceLink;
+        }
+      }
+      return data;
+    }
+
+    function moveCard(id, columnId, anchorId, place) {
+      const card = state.cards.find((c) => c.id === id);
+      if (!card) return;
+      if (anchorId && id === anchorId) return;
+
+      const rest = state.cards.filter((c) => c.id !== id);
+      card.column = columnId;
+
+      if (anchorId) {
+        const idx = rest.findIndex((c) => c.id === anchorId);
+        if (idx >= 0) {
+          rest.splice(place === "before" ? idx : idx + 1, 0, card);
+          state.cards = rest;
+        } else {
+          const byCol = {};
+          columns().forEach((col) => { byCol[col.id] = []; });
+          for (const c of rest) {
+            if (!byCol[c.column]) byCol[c.column] = [];
+            byCol[c.column].push(c);
+          }
+          if (!byCol[columnId]) byCol[columnId] = [];
+          byCol[columnId].push(card);
+          state.cards = columns().flatMap((col) => byCol[col.id] || []);
+        }
+      } else {
+        const byCol = {};
+        columns().forEach((col) => { byCol[col.id] = []; });
+        for (const c of rest) {
+          if (!byCol[c.column]) byCol[c.column] = [];
+          byCol[c.column].push(c);
+        }
+        if (!byCol[columnId]) byCol[columnId] = [];
+        byCol[columnId].push(card);
+        state.cards = columns().flatMap((col) => byCol[col.id] || []);
+      }
+
+      const colTitle = columns().find((c) => c.id === columnId)?.title || columnId;
+      saveState("Verschoben → " + colTitle);
+      render();
+    }
+
+    function startPlaceMode(cardId) {
+      placeModeId = cardId;
+      const card = state.cards.find((c) => c.id === cardId);
+      document.body.classList.add("placing");
+      placeBannerText.textContent =
+        "Idee „" + (card?.title || "").slice(0, 40) + "“ – jetzt auf Spalte oder Karte klicken";
+      if (placeGhost) placeGhost.remove();
+      placeGhost = document.createElement("div");
+      placeGhost.className = "place-ghost";
+      placeGhost.textContent = card?.title || "Neue Idee";
+      document.body.appendChild(placeGhost);
+      render();
+      saveState("Platzieren…");
+    }
+
+    function stopPlaceMode(keepInBrainstorm) {
+      const id = placeModeId;
+      placeModeId = null;
+      document.body.classList.remove("placing");
+      if (placeGhost) {
+        placeGhost.remove();
+        placeGhost = null;
+      }
+      if (keepInBrainstorm && id) {
+        const card = state.cards.find((c) => c.id === id);
+        if (card) card.column = fallbackColumnId() || columns()[0]?.id;
+        saveState("In Standard-Spalte belassen");
+      }
+      render();
+    }
+
+    function finishPlace(columnId, anchorId, place) {
+      if (!placeModeId) return;
+      const id = placeModeId;
+      placeModeId = null;
+      document.body.classList.remove("placing");
+      if (placeGhost) {
+        placeGhost.remove();
+        placeGhost = null;
+      }
+      moveCard(id, columnId, anchorId, place);
+    }
+
+    function onPlaceMouseMove(e) {
+      if (!placeGhost || !placeModeId) return;
+      placeGhost.style.left = e.clientX + "px";
+      placeGhost.style.top = e.clientY + "px";
+    }
+
+    function defaultEditorTitle() {
+      return editId ? "Idee bearbeiten" : "Neue Idee";
+    }
+
+    function syncEditorTitle() {
+      const el = document.getElementById("editor-title");
+      if (!el) return;
+      const typed = (fieldTitle.value || "").trim().replace(/\s+/g, " ");
+      el.textContent = typed || defaultEditorTitle();
+    }
+
+    function cloneAttachments(list) {
+      return (Array.isArray(list) ? list : []).map((a) => ({
+        id: a.id || "",
+        name: a.name || "Datei",
+        stored: a.stored || "",
+        url: a.url || (a.stored ? "/attachments/" + a.stored : ""),
+        mime: a.mime || "application/octet-stream",
+        size: Number(a.size) || 0,
+        addedAt: a.addedAt || "",
+      }));
+    }
+
+    function formatFileSize(bytes) {
+      const n = Number(bytes) || 0;
+      if (n < 1024) return n + " B";
+      if (n < 1024 * 1024) return (n / 1024).toFixed(1) + " KB";
+      return (n / (1024 * 1024)).toFixed(1) + " MB";
+    }
+
+    function renderEditorAttachments() {
+      if (!fieldAttachList) return;
+      fieldAttachList.innerHTML = "";
+      if (!editorAttachments.length) {
+        const empty = document.createElement("div");
+        empty.className = "attach-hint";
+        empty.textContent = "Noch keine Dateien verknüpft.";
+        fieldAttachList.appendChild(empty);
+        return;
+      }
+      editorAttachments.forEach((att, idx) => {
+        const row = document.createElement("div");
+        row.className = "attach-item";
+        const link = document.createElement("a");
+        link.href = att.url || ("/attachments/" + (att.stored || ""));
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = "📎 " + (att.name || "Datei") + (att.size ? " (" + formatFileSize(att.size) + ")" : "");
+        const rm = document.createElement("button");
+        rm.type = "button";
+        rm.className = "attach-remove";
+        rm.title = "Datei entfernen";
+        rm.setAttribute("aria-label", "Datei entfernen");
+        rm.textContent = "✕";
+        rm.addEventListener("click", async () => {
+          const item = editorAttachments[idx];
+          editorAttachments.splice(idx, 1);
+          renderEditorAttachments();
+          if (item && item.stored && !IS_FILE_PROTOCOL) {
+            try {
+              await fetch("/api/attachments", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ stored: item.stored }),
+              });
+            } catch {
+              /* ignore */
+            }
+          }
+        });
+        row.append(link, rm);
+        fieldAttachList.appendChild(row);
+      });
+    }
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = String(reader.result || "");
+          const comma = result.indexOf(",");
+          resolve(comma >= 0 ? result.slice(comma + 1) : result);
+        };
+        reader.onerror = () => reject(reader.error || new Error("Datei lesen fehlgeschlagen"));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function uploadAttachmentFile(file) {
+      if (!file) return null;
+      if (IS_FILE_PROTOCOL) {
+        throw new Error("Dateianhänge brauchen den Kanban-Server (BAT / Desktop-Verknüpfung).");
+      }
+      if (file.size > 40 * 1024 * 1024) {
+        throw new Error("Datei zu groß (max. 40 MB): " + file.name);
+      }
+      const b64 = await fileToBase64(file);
+      const res = await fetch("/api/attachments", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: file.name,
+          mime: file.type || "application/octet-stream",
+          data: b64,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) {
+        throw new Error(data.error || ("Upload fehlgeschlagen (" + res.status + ")"));
+      }
+      return data.attachment;
+    }
+
+    async function onAttachFilesSelected(fileList) {
+      const files = Array.from(fileList || []);
+      if (!files.length || attachBusy) return;
+      attachBusy = true;
+      try {
+        for (const file of files) {
+          const meta = await uploadAttachmentFile(file);
+          if (meta) editorAttachments.push(meta);
+        }
+        renderEditorAttachments();
+      } catch (err) {
+        alert(err && err.message ? err.message : String(err));
+      } finally {
+        attachBusy = false;
+        if (fieldAttach) fieldAttach.value = "";
+      }
+    }
+
+    async function managerFetch(path, opts) {
+      const res = await fetch(MANAGER_API + path, opts || {});
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) {
+        throw new Error(data.error || ("Manager-Fehler (" + res.status + ")"));
+      }
+      return data;
+    }
+
+    async function openLinkedSource(link) {
+      if (!link || !link.boardSlug) return;
+      try {
+        await managerFetch("/api/boards/open", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            slug: link.boardSlug,
+            cardId: link.cardId || "",
+          }),
+        });
+      } catch (err) {
+        alert(
+          (err && err.message ? err.message : String(err)) +
+            "\n\nBitte den Kanban-Manager starten (Desktop-Verknüpfung)."
+        );
+      }
+    }
+
+    function setCopyStatus(text, kind) {
+      if (!copyStatus) return;
+      if (!text) {
+        copyStatus.hidden = true;
+        copyStatus.textContent = "";
+        return;
+      }
+      copyStatus.hidden = false;
+      copyStatus.textContent = text;
+      copyStatus.style.color = kind === "err" ? "#a83228" : kind === "ok" ? "#2f6f4e" : "";
+    }
+
+    async function loadCopyBoardColumns(slug) {
+      copyColumnSelect.innerHTML = "";
+      if (!slug) return;
+      try {
+        const data = await managerFetch(
+          "/api/boards/meta?slug=" + encodeURIComponent(slug)
+        );
+        const cols = (data.board && data.board.columns) || [];
+        if (!cols.length) {
+          const opt = document.createElement("option");
+          opt.value = "";
+          opt.textContent = "(keine Spalten)";
+          copyColumnSelect.appendChild(opt);
+          return;
+        }
+        cols.forEach((col, i) => {
+          const opt = document.createElement("option");
+          opt.value = col.id;
+          opt.textContent = col.title || col.id;
+          if (i === 0) opt.selected = true;
+          copyColumnSelect.appendChild(opt);
+        });
+      } catch (err) {
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "Spalten nicht ladbar";
+        copyColumnSelect.appendChild(opt);
+        setCopyStatus(err.message || String(err), "err");
+      }
+    }
+
+    async function openCopyDialog() {
+      if (!editId) {
+        alert("Bitte die Karte zuerst speichern, bevor du sie kopierst.");
+        return;
+      }
+      setCopyStatus("");
+      copyBoardSelect.innerHTML = "";
+      copyColumnSelect.innerHTML = "";
+      try {
+        const data = await managerFetch("/api/boards");
+        const boards = (data.boards || []).filter((b) => b.slug && b.slug !== BOARD_SLUG);
+        if (!boards.length) {
+          alert("Kein anderes Board gefunden. Lege zuerst ein weiteres Board im Manager an.");
+          return;
+        }
+        boards.forEach((b, i) => {
+          const opt = document.createElement("option");
+          opt.value = b.slug;
+          opt.textContent = (b.name || b.title || b.slug) + " · :" + b.port;
+          if (i === 0) opt.selected = true;
+          copyBoardSelect.appendChild(opt);
+        });
+        await loadCopyBoardColumns(copyBoardSelect.value);
+        copyDialog.showModal();
+      } catch (err) {
+        alert(
+          (err && err.message ? err.message : String(err)) +
+            "\n\nBitte den Kanban-Manager starten (Port 8760)."
+        );
+      }
+    }
+
+    async function submitCopyCard(e) {
+      if (e) e.preventDefault();
+      if (!editId || copyBusy) return;
+      const targetSlug = copyBoardSelect.value;
+      if (!targetSlug) return;
+      copyBusy = true;
+      setCopyStatus("Kopiere…");
+      try {
+        // Aktuelle Editor-Werte zuerst speichern
+        const card = state.cards.find((c) => c.id === editId);
+        if (card) {
+          card.title = fieldTitle.value.trim() || card.title;
+          card.notes = fieldNotes.value.trim();
+          card.column = fieldColumn.value || card.column;
+          card.color = selectedCardColor || "none";
+          card.dueDate = fieldDue ? normalizeDueValue(fieldDue.value) : card.dueDate;
+          card.attachments = cloneAttachments(editorAttachments);
+          saveState("Vor dem Kopieren gespeichert");
+        }
+        const result = await managerFetch("/api/cards/copy", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sourceSlug: BOARD_SLUG,
+            sourcePath: BOARD_DIR,
+            sourceCardId: editId,
+            targetSlug,
+            targetColumnId: copyColumnSelect.value || "",
+            openAfter: !!(copyOpenAfter && copyOpenAfter.checked),
+          }),
+        });
+        setCopyStatus(
+          "Kopiert nach „" +
+            ((result.target && (result.target.title || result.target.slug)) || targetSlug) +
+            "“.",
+          "ok"
+        );
+        statusEl.textContent = "✓ Karte in anderes Board kopiert";
+        setTimeout(() => copyDialog.close(), 700);
+      } catch (err) {
+        setCopyStatus(err.message || String(err), "err");
+      } finally {
+        copyBusy = false;
+      }
+    }
+
+    function openEditor(id, defaultColumn, opts) {
+      editId = id;
+      createAndPlace = !!(opts && opts.placeAfterCreate) && !id;
+      const card = id ? state.cards.find((c) => c.id === id) : null;
+      fieldTitle.value = card?.title || "";
+      fieldNotes.value = card?.notes || "";
+      if (fieldDue) fieldDue.value = normalizeDueValue(card?.dueDate) || "";
+      editorAttachments = cloneAttachments(card?.attachments);
+      renderEditorAttachments();
+      refreshColumnSelect(card?.column || defaultColumn || fallbackColumnId() || columns()[0]?.id);
+      selectedCardColor = card?.color || "none";
+      buildColorPicker(fieldCardColor, selectedCardColor, (id) => {
+        selectedCardColor = id;
+      });
+      fieldColumnWrap.classList.toggle("hidden", createAndPlace);
+      btnSave.textContent = createAndPlace ? "Anlegen & platzieren" : "Speichern";
+      const delInDialog = document.getElementById("btn-delete-card");
+      delInDialog.style.display = card ? "inline-flex" : "none";
+      const copyInDialog = document.getElementById("btn-copy-card");
+      if (copyInDialog) copyInDialog.style.display = card ? "inline-flex" : "none";
+      const flipInDialog = document.getElementById("btn-card-flip-dialog");
+      flipInDialog.style.display = card ? "inline-flex" : "none";
+      if (card) {
+        const filled = flipchartHasContent(card.id);
+        flipInDialog.classList.toggle("has-content", filled);
+        flipInDialog.innerHTML =
+          '<span aria-hidden="true">📋</span>' +
+          (filled ? '<span class="dot" aria-hidden="true"></span>' : "");
+        flipInDialog.title = filled ? "Flipchart hat Inhalt – öffnen" : "Flipchart öffnen";
+      }
+      syncEditorTitle();
+      editor.showModal();
+      fieldTitle.focus();
+    }
+
+    fieldTitle.addEventListener("input", syncEditorTitle);
+    if (fieldAttach) {
+      fieldAttach.addEventListener("change", () => onAttachFilesSelected(fieldAttach.files));
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const title = fieldTitle.value.trim();
+      if (!title) return;
+      const shouldPlace = createAndPlace;
+
+      const dueDate = fieldDue ? normalizeDueValue(fieldDue.value) : "";
+      const attachments = cloneAttachments(editorAttachments);
+
+      if (editId) {
+        const card = state.cards.find((c) => c.id === editId);
+        if (card) {
+          card.title = title;
+          card.notes = fieldNotes.value.trim();
+          card.column = fieldColumn.value;
+          card.color = selectedCardColor || "none";
+          card.dueDate = dueDate;
+          card.attachments = attachments;
+          delete card.tag;
+        }
+        createAndPlace = false;
+        saveState("Idee aktualisiert");
+        editor.close();
+        render();
+      } else {
+        const newId = uid();
+        state.cards.push({
+          id: newId,
+          title,
+          notes: fieldNotes.value.trim(),
+          column: shouldPlace
+            ? (fallbackColumnId() || columns()[0]?.id || "brainstorm")
+            : fieldColumn.value,
+          createdAt: nowIsoDate(),
+          color: selectedCardColor || "none",
+          dueDate,
+          attachments,
+        });
+        createAndPlace = false;
+        editor.close();
+        if (shouldPlace) {
+          saveState("Idee angelegt – bitte platzieren");
+          startPlaceMode(newId);
+        } else {
+          saveState("Idee angelegt");
+          render();
+        }
+      }
+    });
+
+    document.getElementById("btn-cancel").addEventListener("click", () => {
+      createAndPlace = false;
+      editor.close();
+    });
+    document.getElementById("btn-insert-check").addEventListener("click", () => {
+      const ta = fieldNotes;
+      const start = ta.selectionStart ?? ta.value.length;
+      const end = ta.selectionEnd ?? start;
+      const val = ta.value;
+      const needsNl = start > 0 && val.charAt(start - 1) !== "\n";
+      const insert = (needsNl ? "\n" : "") + "[ ] ";
+      ta.value = val.slice(0, start) + insert + val.slice(end);
+      const pos = start + insert.length;
+      ta.focus();
+      ta.setSelectionRange(pos, pos);
+    });
+    document.getElementById("btn-delete-card").addEventListener("click", () => {
+      if (!editId) return;
+      const id = editId;
+      editor.close();
+      createAndPlace = false;
+      deleteCard(id);
+    });
+    document.getElementById("btn-copy-card").addEventListener("click", () => {
+      openCopyDialog();
+    });
+    document.getElementById("btn-copy-cancel").addEventListener("click", () => {
+      copyDialog.close();
+    });
+    copyBoardSelect.addEventListener("change", () => {
+      loadCopyBoardColumns(copyBoardSelect.value);
+    });
+    copyForm.addEventListener("submit", submitCopyCard);
+    document.getElementById("btn-card-flip-dialog").addEventListener("click", () => {
+      if (!editId) return;
+      const card = state.cards.find((c) => c.id === editId);
+      editor.close();
+      openFlipchart(editId, card?.title || "Karte");
+    });
+    document.getElementById("btn-add").addEventListener("click", () =>
+      openEditor(null, fallbackColumnId() || columns()[0]?.id, { placeAfterCreate: true })
+    );
+    document.getElementById("btn-add-column").addEventListener("click", openColumnEditor);
+    document.getElementById("btn-flipchart").addEventListener("click", () => openFlipchart(null, null));
+    document.getElementById("btn-flipchart-back").addEventListener("click", () => closeFlipchart());
+    document.getElementById("btn-col-cancel").addEventListener("click", () => {
+      document.getElementById("column-editor").close();
+    });
+    document.getElementById("column-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const title = document.getElementById("field-col-title").value.trim();
+      const hint = document.getElementById("field-col-hint").value.trim();
+      if (!title) return;
+      document.getElementById("column-editor").close();
+      addColumn(title, hint, selectedColColor);
+    });
+    document.getElementById("btn-cancel-place").addEventListener("click", () => stopPlaceMode(true));
+    document.addEventListener("mousemove", onPlaceMouseMove);
+
+    document.getElementById("search").addEventListener("input", (e) => {
+      searchQuery = e.target.value;
+      render();
+    });
+
+    const colorFilterBtn = document.getElementById("btn-color-filter");
+    if (colorFilterBtn) {
+      colorFilterBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const bar = document.getElementById("color-filters");
+        setColorFilterOpen(!(bar && bar.classList.contains("open")));
+      });
+    }
+    document.addEventListener("click", (e) => {
+      const wrap = e.target.closest(".search-wrap");
+      if (!wrap) setColorFilterOpen(false);
+      if (!e.target.closest(".card-actions")) {
+        document.querySelectorAll(".card-attach-menu").forEach((n) => n.remove());
+      }
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        setColorFilterOpen(false);
+        document.querySelectorAll(".card-attach-menu").forEach((n) => n.remove());
+      }
+    });
+
+    document.getElementById("btn-export").addEventListener("click", (e) => {
+      e.stopPropagation();
+      const menu = document.getElementById("export-menu");
+      const btn = document.getElementById("btn-export");
+      const open = menu.hasAttribute("hidden");
+      if (open) menu.removeAttribute("hidden");
+      else menu.setAttribute("hidden", "");
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+
+    function downloadBlob(blob, filename) {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function exportFilename(ext) {
+      const base = (BOARD_TITLE || DEFAULT_FILE_NAME || "Kanban")
+        .replace(/[<>:"/\\|?*]+/g, " ")
+        .trim()
+        .slice(0, 80) || "Kanban";
+      return base + "." + ext;
+    }
+
+    async function exportViaServer(format) {
+      if (IS_FILE_PROTOCOL) {
+        throw new Error("Excel/Word/PDF brauchen den Kanban-Server (BAT / Desktop-Verknüpfung).");
+      }
+      const res = await fetch("/api/export", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          format,
+          title: BOARD_TITLE || "Kanban",
+          state,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || ("Export fehlgeschlagen (" + res.status + ")"));
+      }
+      const blob = await res.blob();
+      const dispo = res.headers.get("Content-Disposition") || "";
+      const match = /filename=\"([^\"]+)\"/i.exec(dispo);
+      downloadBlob(blob, match ? match[1] : exportFilename(format === "xlsx" ? "xlsx" : format === "docx" ? "docx" : format));
+    }
+
+    function exportJson() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+      downloadBlob(blob, exportFilename("json"));
+    }
+
+    function wrapText(ctx, text, maxWidth) {
+      const words = String(text || "").split(/\s+/).filter(Boolean);
+      const lines = [];
+      let line = "";
+      words.forEach((word) => {
+        const test = line ? line + " " + word : word;
+        if (ctx.measureText(test).width > maxWidth && line) {
+          lines.push(line);
+          line = word;
+        } else {
+          line = test;
+        }
+      });
+      if (line) lines.push(line);
+      return lines.length ? lines : [""];
+    }
+
+    function exportPngBoard() {
+      const cols = columns();
+      const colW = 260;
+      const gap = 18;
+      const pad = 28;
+      const headerH = 64;
+      const cardPad = 10;
+      const width = Math.max(640, pad * 2 + cols.length * colW + Math.max(0, cols.length - 1) * gap);
+      // measure height
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      ctx.font = "600 14px Georgia, serif";
+      let maxH = headerH + pad;
+      cols.forEach((col) => {
+        const cards = sortCardsByDue(state.cards.filter((c) => c.column === col.id));
+        let h = 48;
+        cards.forEach((card) => {
+          const titleLines = wrapText(ctx, card.title || "", colW - 28);
+          const noteLines = card.notes ? wrapText(ctx, String(card.notes).slice(0, 180), colW - 28).slice(0, 4) : [];
+          h += 18 + titleLines.length * 18 + noteLines.length * 14 + (card.dueDate ? 16 : 0) + cardPad;
+        });
+        maxH = Math.max(maxH, headerH + pad + h + 20);
+      });
+      canvas.width = width;
+      canvas.height = Math.min(maxH + pad, 8000);
+      // background
+      const g = ctx.createLinearGradient(0, 0, width, canvas.height);
+      g.addColorStop(0, "#1f3d2f");
+      g.addColorStop(1, "#274c3a");
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, width, canvas.height);
+      ctx.fillStyle = "#e8f0e6";
+      ctx.font = "700 22px Georgia, serif";
+      ctx.fillText(BOARD_TITLE || "Kanban Board", pad, 36);
+      ctx.font = "500 12px Georgia, serif";
+      ctx.fillStyle = "rgba(232,240,230,0.75)";
+      ctx.fillText(new Date().toLocaleString("de-DE"), pad, 54);
+
+      cols.forEach((col, i) => {
+        const x = pad + i * (colW + gap);
+        let y = headerH + pad;
+        ctx.fillStyle = "rgba(255,253,246,0.94)";
+        roundRect(ctx, x, y, colW, canvas.height - y - pad, 14);
+        ctx.fill();
+        y += 16;
+        ctx.fillStyle = "#1c2620";
+        ctx.font = "700 15px Georgia, serif";
+        ctx.fillText(col.title || col.id, x + 14, y + 14);
+        y += 28;
+        const cards = sortCardsByDue(state.cards.filter((c) => c.column === col.id));
+        cards.forEach((card) => {
+          const color = getColor(card.color || "none");
+          const titleLines = wrapText(ctx, card.title || "", colW - 28);
+          const noteLines = card.notes
+            ? wrapText(ctx, String(card.notes).replace(/\s+/g, " ").slice(0, 180), colW - 28).slice(0, 4)
+            : [];
+          const boxH =
+            14 + titleLines.length * 17 + noteLines.length * 13 + (card.dueDate ? 15 : 0) + 12;
+          ctx.fillStyle = color.card || "#fffdf6";
+          roundRect(ctx, x + 10, y, colW - 20, boxH, 10);
+          ctx.fill();
+          ctx.strokeStyle = color.border || "#cfc6b0";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          let ty = y + 16;
+          ctx.fillStyle = "#1c2620";
+          ctx.font = "700 13px Georgia, serif";
+          titleLines.forEach((line) => {
+            ctx.fillText(line, x + 18, ty);
+            ty += 17;
+          });
+          if (noteLines.length) {
+            ctx.font = "500 11px Georgia, serif";
+            ctx.fillStyle = "#334038";
+            noteLines.forEach((line) => {
+              ctx.fillText(line, x + 18, ty);
+              ty += 13;
+            });
+          }
+          if (card.dueDate) {
+            ctx.font = "650 11px Georgia, serif";
+            ctx.fillStyle = "#8a2f28";
+            ctx.fillText("Fällig: " + formatCardDate(card.dueDate), x + 18, ty + 2);
+          }
+          y += boxH + 8;
+        });
+      });
+
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          alert("PNG-Export fehlgeschlagen.");
+          return;
+        }
+        downloadBlob(blob, exportFilename("png"));
+        statusEl.textContent = "✓ PNG exportiert";
+      }, "image/png");
+    }
+
+    function roundRect(ctx, x, y, w, h, r) {
+      const radius = Math.min(r, w / 2, h / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.arcTo(x + w, y, x + w, y + h, radius);
+      ctx.arcTo(x + w, y + h, x, y + h, radius);
+      ctx.arcTo(x, y + h, x, y, radius);
+      ctx.arcTo(x, y, x + w, y, radius);
+      ctx.closePath();
+    }
+
+    document.getElementById("export-menu").addEventListener("click", async (e) => {
+      const btn = e.target.closest("[data-export]");
+      if (!btn) return;
+      e.stopPropagation();
+      const format = btn.getAttribute("data-export");
+      document.getElementById("export-menu").setAttribute("hidden", "");
+      document.getElementById("btn-export").setAttribute("aria-expanded", "false");
+      try {
+        if (format === "json") {
+          exportJson();
+          statusEl.textContent = "✓ JSON exportiert";
+        } else if (format === "png") {
+          exportPngBoard();
+        } else {
+          statusEl.textContent = "Exportiere…";
+          await exportViaServer(format);
+          statusEl.textContent = "✓ Export heruntergeladen";
+        }
+      } catch (err) {
+        alert(err && err.message ? err.message : String(err));
+        statusEl.textContent = "⚠ Export fehlgeschlagen";
+      }
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(".export-wrap")) {
+        const menu = document.getElementById("export-menu");
+        if (menu) menu.setAttribute("hidden", "");
+        const btn = document.getElementById("btn-export");
+        if (btn) btn.setAttribute("aria-expanded", "false");
+      }
+    });
+
+    document.getElementById("import").addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const parsed = JSON.parse(text);
+        if (!parsed || !Array.isArray(parsed.cards)) throw new Error("Ungültiges Format");
+        state = parsed;
+        saveState("Importiert");
+        render();
+      } catch (err) {
+        alert("Import fehlgeschlagen: " + err.message);
+      }
+      e.target.value = "";
+    });
+
+    document.getElementById("btn-undo").addEventListener("click", () => undoHistory());
+    document.getElementById("btn-redo").addEventListener("click", () => redoHistory());
+
+    // keyboard: N = neue Idee, Esc = Platzieren abbrechen / Flipchart schließen
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && document.getElementById("flipchart-overlay").classList.contains("open")) {
+        closeFlipchart();
+        return;
+      }
+      if (e.key === "Escape" && placeModeId) {
+        stopPlaceMode(true);
+        return;
+      }
+      const mod = e.ctrlKey || e.metaKey;
+      if (mod && (e.key === "z" || e.key === "Z")) {
+        if (e.target.matches("input, textarea, select")) return;
+        e.preventDefault();
+        if (e.shiftKey) redoHistory();
+        else undoHistory();
+        return;
+      }
+      if (mod && (e.key === "y" || e.key === "Y")) {
+        if (e.target.matches("input, textarea, select")) return;
+        e.preventDefault();
+        redoHistory();
+        return;
+      }
+      if (e.target.matches("input, textarea, select")) return;
+      if (placeModeId) return;
+      if (document.getElementById("flipchart-overlay").classList.contains("open")) return;
+      if (e.key === "n" || e.key === "N") {
+        openEditor(null, fallbackColumnId() || columns()[0]?.id, { placeAfterCreate: true });
+      }
+    });
+
+    const FLIPCHART_LS_PREFIX = "__FLIPCHART_LS_PREFIX__";
+    /** @type {Set<string>} */
+    let flipchartFilled = new Set();
+    /** @type {Record<string, number>} */
+    let flipchartCounts = {};
+    let flipchartLoaded = false;
+    let flipchartSaveTimer = null;
+    let flipchartRoot = null;
+    let flipchartScene = null;
+    /** @type {string} */
+    let flipchartContextId = "global";
+    /** @type {string} */
+    let flipchartLabel = "Allgemein";
+
+    function flipchartHasContent(id) {
+      return flipchartFilled.has(id || "global");
+    }
+
+    function countActiveElements(elements) {
+      return (elements || []).filter((e) => e && !e.isDeleted).length;
+    }
+
+    function updateFlipchartButtonUI(contextId) {
+      const id = contextId || "global";
+      const filled = flipchartHasContent(id);
+      const count = flipchartCounts[id] || 0;
+
+      if (id === "global") {
+        const btn = document.getElementById("btn-flipchart");
+        if (btn) {
+          btn.classList.toggle("has-content", filled);
+          btn.title = filled
+            ? "Allgemeines Flipchart hat Inhalt (" + count + ")"
+            : "Excalidraw Flipchart öffnen";
+          btn.textContent = filled ? "● Flipchart" : "Flipchart";
+        }
+        return;
+      }
+
+      const cardBtn = document.querySelector('.card[data-id="' + CSS.escape(id) + '"] .btn-card-flip');
+      if (cardBtn) {
+        cardBtn.classList.toggle("has-content", filled);
+        cardBtn.title = filled
+          ? "Flipchart hat Inhalt (" + count + ") – öffnen"
+          : "Beispiele / Ideen auf Flipchart brainstormen";
+      }
+
+      if (editId === id) {
+        const dialogBtn = document.getElementById("btn-card-flip-dialog");
+        if (dialogBtn && dialogBtn.style.display !== "none") {
+          dialogBtn.classList.toggle("has-content", filled);
+          dialogBtn.innerHTML =
+            '<span aria-hidden="true">📋</span>' +
+            (filled ? '<span class="dot" aria-hidden="true"></span>' : "");
+          dialogBtn.title = filled ? "Flipchart hat Inhalt – öffnen" : "Flipchart öffnen";
+        }
+      }
+    }
+
+    function setFlipchartFilled(contextId, count) {
+      const id = contextId || "global";
+      const filled = count > 0;
+      const was = flipchartFilled.has(id);
+      const prevCount = flipchartCounts[id] || 0;
+      if (filled) {
+        flipchartFilled.add(id);
+        flipchartCounts[id] = count;
+      } else {
+        flipchartFilled.delete(id);
+        delete flipchartCounts[id];
+      }
+      if (was !== filled || prevCount !== count) {
+        updateFlipchartButtonUI(id);
+      }
+    }
+
+    async function refreshFlipchartIndex() {
+      if (IS_FILE_PROTOCOL) {
+        // localStorage-Fallback: bekannte Karten-Keys scannen
+        flipchartFilled = new Set();
+        flipchartCounts = {};
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (!key || !key.startsWith(FLIPCHART_LS_PREFIX)) continue;
+          try {
+            const data = JSON.parse(localStorage.getItem(key) || "{}");
+            const count = countActiveElements(data.elements);
+            const id = key.slice(FLIPCHART_LS_PREFIX.length);
+            if (count > 0) {
+              flipchartFilled.add(id);
+              flipchartCounts[id] = count;
+            }
+          } catch {
+            /* ignore */
+          }
+        }
+        return;
+      }
+      try {
+        const res = await fetch("/api/flipchart-index", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json();
+        flipchartFilled = new Set(data.ids || []);
+        flipchartCounts = data.counts || {};
+      } catch {
+        /* ignore */
+      }
+    }
+
+    function flipchartApi(contextId) {
+      const id = contextId || "global";
+      if (id === "global") return "/__FLIPCHART_JSON__";
+      return "/flipcharts/" + encodeURIComponent(id) + ".json";
+    }
+
+    function flipchartLsKey(contextId) {
+      return FLIPCHART_LS_PREFIX + (contextId || "global");
+    }
+
+    function emptyFlipchartScene() {
+      return {
+        type: "excalidraw",
+        version: 2,
+        source: "__BOARD_SOURCE__",
+        elements: [],
+        appState: { viewBackgroundColor: "#f7f3e8", gridSize: null },
+        files: {},
+      };
+    }
+
+    function loadScript(src) {
+      return new Promise((resolve, reject) => {
+        if (document.querySelector('script[src="' + src + '"]')) {
+          resolve();
+          return;
+        }
+        const s = document.createElement("script");
+        s.src = src;
+        s.onload = () => resolve();
+        s.onerror = () => reject(new Error("Script fehlgeschlagen: " + src));
+        document.head.appendChild(s);
+      });
+    }
+
+    function loadCss(href) {
+      if (document.querySelector('link[href="' + href + '"]')) return;
+      const l = document.createElement("link");
+      l.rel = "stylesheet";
+      l.href = href;
+      document.head.appendChild(l);
+    }
+
+    async function ensureExcalidraw() {
+      if (window.ExcalidrawLib && window.React && window.ReactDOM) return;
+      const status = document.getElementById("flipchart-status");
+      status.textContent = "Lade Excalidraw…";
+      loadCss("https://unpkg.com/@excalidraw/excalidraw@0.17.6/dist/excalidraw.min.css");
+      await loadScript("https://unpkg.com/react@18.2.0/umd/react.production.min.js");
+      await loadScript("https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js");
+      await loadScript("https://unpkg.com/@excalidraw/excalidraw@0.17.6/dist/excalidraw.production.min.js");
+      if (!window.ExcalidrawLib) throw new Error("Excalidraw nicht geladen");
+    }
+
+    async function loadFlipchartScene(contextId) {
+      const api = flipchartApi(contextId);
+      const lsKey = flipchartLsKey(contextId);
+      if (!IS_FILE_PROTOCOL) {
+        try {
+          const res = await fetch(api, { cache: "no-store" });
+          if (res.ok) {
+            const data = await res.json();
+            if (data && Array.isArray(data.elements)) return data;
+          }
+        } catch {
+          /* fallback */
+        }
+      }
+      try {
+        const raw = localStorage.getItem(lsKey);
+        if (raw) {
+          const data = JSON.parse(raw);
+          if (data && Array.isArray(data.elements)) return data;
+        }
+      } catch {
+        /* ignore */
+      }
+      return emptyFlipchartScene();
+    }
+
+    function queueFlipchartSave(elements, appState, files) {
+      const contextId = flipchartContextId || "global";
+      flipchartScene = {
+        type: "excalidraw",
+        version: 2,
+        source: "__BOARD_SOURCE__",
+        elements,
+        appState: {
+          viewBackgroundColor: (appState && appState.viewBackgroundColor) || "#f7f3e8",
+          gridSize: null,
+        },
+        files: files || {},
+      };
+      localStorage.setItem(flipchartLsKey(contextId), JSON.stringify(flipchartScene));
+      setFlipchartFilled(contextId, countActiveElements(elements));
+      clearTimeout(flipchartSaveTimer);
+      flipchartSaveTimer = setTimeout(async () => {
+        const status = document.getElementById("flipchart-status");
+        if (IS_FILE_PROTOCOL) {
+          status.textContent = "⚠ Nur Browser-Speicher – bitte über Desktop-Verknüpfung öffnen";
+          return;
+        }
+        try {
+          const res = await fetch(flipchartApi(contextId), {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(flipchartScene),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (res.ok && data.ok !== false) {
+            const t =
+              new Date().toLocaleTimeString("de-DE", {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+              }) + " Uhr";
+            status.textContent = "✓ Flipchart gespeichert · " + t;
+          } else {
+            status.textContent = "⚠ Flipchart-Speichern fehlgeschlagen";
+          }
+        } catch {
+          status.textContent = "⚠ Kein Server – Flipchart nur im Browser";
+        }
+      }, 400);
+    }
+
+    let excalidrawApi = null;
+
+    function remountFlipchartRoot() {
+      if (flipchartRoot) {
+        try {
+          flipchartRoot.unmount();
+        } catch {
+          /* ignore */
+        }
+        flipchartRoot = null;
+      }
+      excalidrawApi = null;
+      const rootEl = document.getElementById("flipchart-root");
+      rootEl.innerHTML = "";
+      flipchartLoaded = false;
+    }
+
+    function applyFlipchartFont(theme) {
+      if (!excalidrawApi || !window.KanbanTheme) return;
+      try {
+        const fontFamily = window.KanbanTheme.getExcalidrawFontFamily(theme || currentTheme);
+        excalidrawApi.updateScene({
+          appState: { currentItemFontFamily: fontFamily },
+        });
+      } catch {
+        /* ignore */
+      }
+    }
+
+    async function openFlipchart(cardId, cardTitle) {
+      const nextId = cardId || "global";
+      const nextLabel = cardId
+        ? String(cardTitle || "Karte").trim() || "Karte"
+        : "Allgemein";
+
+      if (flipchartLoaded && flipchartContextId !== nextId) {
+        remountFlipchartRoot();
+      }
+
+      flipchartContextId = nextId;
+      flipchartLabel = nextLabel;
+
+      const overlay = document.getElementById("flipchart-overlay");
+      const status = document.getElementById("flipchart-status");
+      const titleEl = document.getElementById("flipchart-title");
+      titleEl.textContent =
+        nextId === "global"
+          ? "Flipchart (Excalidraw)"
+          : "Flipchart: " + nextLabel;
+
+      overlay.classList.add("open");
+      overlay.setAttribute("aria-hidden", "false");
+      try {
+        await ensureExcalidraw();
+        if (!flipchartLoaded) {
+          flipchartScene = await loadFlipchartScene(nextId);
+          setFlipchartFilled(nextId, countActiveElements(flipchartScene.elements));
+          const rootEl = document.getElementById("flipchart-root");
+          flipchartRoot = ReactDOM.createRoot(rootEl);
+          const App = () =>
+            React.createElement(ExcalidrawLib.Excalidraw, {
+              initialData: {
+                type: "excalidraw",
+                version: 2,
+                elements: flipchartScene.elements || [],
+                appState: Object.assign(
+                  { viewBackgroundColor: "#f7f3e8" },
+                  flipchartScene.appState || {},
+                  {
+                    currentItemFontFamily: window.KanbanTheme
+                      ? window.KanbanTheme.getExcalidrawFontFamily(currentTheme)
+                      : 1,
+                  }
+                ),
+                files: flipchartScene.files || {},
+                scrollToContent: true,
+              },
+              langCode: window.KanbanI18n
+                ? window.KanbanI18n.excalidrawLangCode()
+                : "de-DE",
+              excalidrawAPI: (api) => {
+                excalidrawApi = api;
+                applyFlipchartFont(currentTheme);
+              },
+              onChange: (elements, appState, files) => {
+                queueFlipchartSave(elements, appState, files);
+              },
+            });
+          flipchartRoot.render(React.createElement(App));
+          flipchartLoaded = true;
+          status.textContent = "✓ Flipchart bereit – speichert automatisch";
+        } else {
+          status.textContent = "✓ Flipchart bereit";
+        }
+      } catch (err) {
+        status.textContent = "Fehler: " + (err && err.message ? err.message : err);
+        alert(
+          "Flipchart konnte nicht geladen werden.\n\n" +
+            (err && err.message ? err.message : err) +
+            "\n\nInternetverbindung nötig (Excalidraw von unpkg)."
+        );
+      }
+    }
+
+    function closeFlipchart() {
+      const overlay = document.getElementById("flipchart-overlay");
+      overlay.classList.remove("open");
+      overlay.setAttribute("aria-hidden", "true");
+    }
+
+    async function loadTheme() {
+      if (!window.KanbanTheme) return null;
+      let theme = window.KanbanTheme.DEFAULT_THEME;
+      if (!IS_FILE_PROTOCOL) {
+        try {
+          const res = await fetch("/api/theme", { cache: "no-store" });
+          if (res.ok) {
+            const data = await res.json();
+            theme = data.theme || theme;
+          }
+        } catch {
+          /* ignore */
+        }
+      } else {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY + ":theme");
+          if (raw) theme = JSON.parse(raw);
+        } catch {
+          /* ignore */
+        }
+      }
+      return window.KanbanTheme.applyTheme(theme);
+    }
+
+    let currentTheme = window.KanbanTheme
+      ? window.KanbanTheme.normalizeTheme(window.KanbanTheme.DEFAULT_THEME)
+      : null;
+    let themeDialogApi = null;
+
+    if (window.KanbanTheme) {
+      if (window.KanbanI18n) {
+        window.KanbanI18n.setLang((currentTheme && currentTheme.lang) || "auto");
+        window.KanbanI18n.applyToDom(document);
+      }
+      const themeDialog = document.getElementById("theme-dialog");
+      themeDialog.innerHTML = window.KanbanTheme.settingsDialogHtml();
+      themeDialogApi = window.KanbanTheme.bindThemeDialog({
+        dialog: themeDialog,
+        initial: currentTheme,
+        onPreview: (theme) => {
+          applyFlipchartFont(theme);
+        },
+        onLangChange: (mode) => {
+          if (window.KanbanI18n) {
+            window.KanbanI18n.setLang(mode || "auto");
+            window.KanbanI18n.applyToDom(document);
+          }
+          buildColorFilters();
+          updateFooterSaveDate();
+        },
+        onSave: async (theme) => {
+          if (IS_FILE_PROTOCOL) {
+            localStorage.setItem(STORAGE_KEY + ":theme", JSON.stringify(theme));
+            currentTheme = theme;
+            window.KanbanTheme.applyTheme(theme);
+            applyFlipchartFont(theme);
+            if (window.KanbanI18n) {
+              window.KanbanI18n.setLang(theme.lang || "auto");
+              window.KanbanI18n.applyToDom(document);
+            }
+            buildColorFilters();
+            updateFooterSaveDate();
+            statusEl.textContent = "✓";
+            return;
+          }
+          const res = await fetch("/api/theme", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ theme }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || ("HTTP " + res.status));
+          currentTheme = window.KanbanTheme.normalizeTheme(data.theme);
+          window.KanbanTheme.applyTheme(currentTheme);
+          applyFlipchartFont(currentTheme);
+          if (window.KanbanI18n) {
+            window.KanbanI18n.setLang(currentTheme.lang || "auto");
+            window.KanbanI18n.applyToDom(document);
+          }
+          buildColorFilters();
+          updateFooterSaveDate();
+          statusEl.textContent = "✓";
+        },
+      });
+      const settingsBtn = document.getElementById("btn-settings");
+      if (settingsBtn) {
+        settingsBtn.addEventListener("click", () => themeDialogApi.open(currentTheme));
+      }
+    }
+
+    async function boot() {
+      if (IS_FILE_PROTOCOL) {
+        statusEl.textContent =
+          "⚠ HTML direkt geöffnet – Speichern ist unzuverlässig. Bitte „Kanban öffnen.bat“ nutzen.";
+        alert(
+          "Bitte das Board über „Kanban oeffnen.bat“ (oder die Desktop-Verknüpfung) öffnen.\n\n" +
+            "Nur dann wird zuverlässig in die Datei gespeichert:\n" +
+            "__BOARD_DIR__/__BOARD_JSON__"
+        );
+      }
+
+      if (window.KanbanTheme) {
+        currentTheme = await loadTheme();
+        if (window.KanbanI18n) {
+          window.KanbanI18n.setLang((currentTheme && currentTheme.lang) || "auto");
+          window.KanbanI18n.applyToDom(document);
+        }
+      }
+
+      const fromDisk = await loadFromDisk();
+      if (fromDisk) {
+        state = normalizeState(fromDisk);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        statusEl.textContent = "✓ Geladen";
+        updateFooterSaveDate(new Date());
+      } else {
+        state = normalizeState(loadState());
+        updateFooterSaveDate();
+      }
+
+      refreshColumnSelect();
+      await refreshFlipchartIndex();
+      buildColorFilters();
+      render();
+      updateFlipchartButtonUI("global");
+      markHistoryBaseline();
+      if (!IS_FILE_PROTOCOL) {
+        queueDiskSave();
+      }
+      restoreAutosaveFile();
+      setInterval(updateHistoryButtons, 60000);
+
+      const deepCard = new URLSearchParams(location.search).get("card");
+      if (deepCard && state.cards.some((c) => c.id === deepCard)) {
+        openEditor(deepCard);
+        try {
+          const clean = new URL(location.href);
+          clean.searchParams.delete("card");
+          history.replaceState({}, "", clean.pathname + clean.search + clean.hash);
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+
+    boot();
+  </script>
+</body>
+</html>

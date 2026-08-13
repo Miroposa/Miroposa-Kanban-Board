@@ -1,0 +1,5 @@
+kanban-server.log
+manager-server.log
+manager-registry.json
+__pycache__/
+*.pyc

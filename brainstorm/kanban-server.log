@@ -1,0 +1,83 @@
+Kanban-Server: http://127.0.0.1:8765/janamathics-kanban.html
+Speicherdatei: C:\Godot\Projekte\Jana_Test\jana_test\docs\brainstorm\janamathics-kanban.json
+Flipchart: C:\Godot\Projekte\Jana_Test\jana_test\docs\brainstorm\janamathics-flipchart.json
+Karten-Flipcharts: C:\Godot\Projekte\Jana_Test\jana_test\docs\brainstorm\flipcharts
+[13/Aug/2026 18:57:58] "GET /janamathics-kanban.html HTTP/1.1" 304 -
+[13/Aug/2026 18:57:58] "GET /janamathics-kanban.json HTTP/1.1" 200 -
+[13/Aug/2026 18:57:58] "GET /api/flipchart-index HTTP/1.1" 200 -
+[13/Aug/2026 18:57:58] code 404, message File not found
+[13/Aug/2026 18:57:58] "GET /favicon.ico HTTP/1.1" 404 -
+[13/Aug/2026 18:57:58] "PUT /janamathics-kanban.json HTTP/1.1" 200 -
+[13/Aug/2026 19:08:19] "GET /janamathics-kanban.html HTTP/1.1" 304 -
+[13/Aug/2026 19:08:19] "GET /janamathics-kanban.json HTTP/1.1" 200 -
+[13/Aug/2026 19:08:19] code 404, message File not found
+[13/Aug/2026 19:08:19] "GET /favicon.ico HTTP/1.1" 404 -
+[13/Aug/2026 19:08:19] "GET /api/flipchart-index HTTP/1.1" 200 -
+[13/Aug/2026 19:08:19] "PUT /janamathics-kanban.json HTTP/1.1" 200 -
+[13/Aug/2026 19:08:24] "GET /janamathics-flipchart.json HTTP/1.1" 200 -
+[13/Aug/2026 19:08:27] "PUT /janamathics-flipchart.json HTTP/1.1" 200 -
+[13/Aug/2026 19:08:28] "PUT /janamathics-flipchart.json HTTP/1.1" 200 -
+[13/Aug/2026 19:08:31] "PUT /janamathics-flipchart.json HTTP/1.1" 200 -
+[13/Aug/2026 19:08:33] "PUT /janamathics-flipchart.json HTTP/1.1" 200 -
+[13/Aug/2026 19:18:07] "GET /janamathics-kanban.html HTTP/1.1" 304 -
+[13/Aug/2026 19:18:07] "GET /janamathics-kanban.json HTTP/1.1" 200 -
+[13/Aug/2026 19:18:07] "GET /api/flipchart-index HTTP/1.1" 200 -
+[13/Aug/2026 19:18:07] code 404, message File not found
+[13/Aug/2026 19:18:07] "GET /favicon.ico HTTP/1.1" 404 -
+[13/Aug/2026 19:18:07] "PUT /janamathics-kanban.json HTTP/1.1" 200 -
+[13/Aug/2026 19:20:40] "GET /janamathics-kanban.json HTTP/1.1" 200 -
+[13/Aug/2026 19:20:40] code 404, message File not found
+[13/Aug/2026 19:20:40] "GET /favicon.ico HTTP/1.1" 404 -
+[13/Aug/2026 19:20:40] "GET /api/flipchart-index HTTP/1.1" 200 -
+[13/Aug/2026 19:20:40] "PUT /janamathics-kanban.json HTTP/1.1" 200 -
+[13/Aug/2026 19:21:28] "GET /janamathics-kanban.json HTTP/1.1" 200 -
+[13/Aug/2026 19:21:28] "GET /api/flipchart-index HTTP/1.1" 200 -
+[13/Aug/2026 19:21:28] code 404, message File not found
+[13/Aug/2026 19:21:28] "GET /favicon.ico HTTP/1.1" 404 -
+[13/Aug/2026 19:21:28] "PUT /janamathics-kanban.json HTTP/1.1" 200 -
+[13/Aug/2026 19:21:37] "GET /janamathics-kanban.json HTTP/1.1" 200 -
+[13/Aug/2026 19:21:37] code 404, message File not found
+[13/Aug/2026 19:21:37] "GET /favicon.ico HTTP/1.1" 404 -
+[13/Aug/2026 19:21:37] "GET /api/flipchart-index HTTP/1.1" 200 -
+[13/Aug/2026 19:21:37] "PUT /janamathics-kanban.json HTTP/1.1" 200 -
+[13/Aug/2026 19:21:47] "GET /janamathics-kanban.json HTTP/1.1" 200 -
+[13/Aug/2026 19:21:47] code 404, message File not found
+[13/Aug/2026 19:21:47] "GET /favicon.ico HTTP/1.1" 404 -
+[13/Aug/2026 19:21:47] "GET /api/flipchart-index HTTP/1.1" 200 -
+[13/Aug/2026 19:21:48] "PUT /janamathics-kanban.json HTTP/1.1" 200 -
+[13/Aug/2026 19:21:52] "GET /janamathics-kanban.json HTTP/1.1" 200 -
+[13/Aug/2026 19:21:52] code 404, message File not found
+[13/Aug/2026 19:21:52] "GET /favicon.ico HTTP/1.1" 404 -
+[13/Aug/2026 19:21:52] "GET /api/flipchart-index HTTP/1.1" 200 -
+[13/Aug/2026 19:21:52] "PUT /janamathics-kanban.json HTTP/1.1" 200 -
+[13/Aug/2026 19:22:01] "PUT /janamathics-kanban.json HTTP/1.1" 200 -
+[13/Aug/2026 19:22:12] "GET /janamathics-kanban.json HTTP/1.1" 200 -
+[13/Aug/2026 19:22:12] code 404, message File not found
+[13/Aug/2026 19:22:12] "GET /favicon.ico HTTP/1.1" 404 -
+[13/Aug/2026 19:22:12] "GET /api/flipchart-index HTTP/1.1" 200 -
+[13/Aug/2026 19:22:12] "PUT /janamathics-kanban.json HTTP/1.1" 200 -
+[13/Aug/2026 21:32:52] "GET /janamathics-kanban.html HTTP/1.1" 304 -
+[13/Aug/2026 21:32:52] "GET /janamathics-kanban.json HTTP/1.1" 200 -
+[13/Aug/2026 21:32:52] code 404, message File not found
+[13/Aug/2026 21:32:52] "GET /favicon.ico HTTP/1.1" 404 -
+[13/Aug/2026 21:32:52] "GET /api/flipchart-index HTTP/1.1" 200 -
+[13/Aug/2026 21:32:52] "PUT /janamathics-kanban.json HTTP/1.1" 200 -
+[13/Aug/2026 21:34:49] "GET /janamathics-kanban.json HTTP/1.1" 200 -
+[13/Aug/2026 21:34:49] "GET /api/flipchart-index HTTP/1.1" 200 -
+[13/Aug/2026 21:34:49] code 404, message File not found
+[13/Aug/2026 21:34:49] "GET /favicon.ico HTTP/1.1" 404 -
+[13/Aug/2026 21:34:49] "PUT /janamathics-kanban.json HTTP/1.1" 200 -
+[13/Aug/2026 21:38:50] "PUT /janamathics-kanban.json HTTP/1.1" 200 -
+[13/Aug/2026 21:56:36] "GET /janamathics-kanban.html HTTP/1.1" 200 -
+[13/Aug/2026 21:56:36] "GET /janamathics-kanban.json HTTP/1.1" 200 -
+[13/Aug/2026 21:56:36] "GET /api/flipchart-index HTTP/1.1" 200 -
+[13/Aug/2026 21:56:36] code 404, message File not found
+[13/Aug/2026 21:56:36] "GET /favicon.ico HTTP/1.1" 404 -
+[13/Aug/2026 21:56:36] "PUT /janamathics-kanban.json HTTP/1.1" 200 -
+[13/Aug/2026 23:53:23] "GET /janamathics-kanban.html?card=c_eb0112bba48e HTTP/1.1" 200 -
+[13/Aug/2026 23:53:23] "GET /janamathics-kanban.json HTTP/1.1" 200 -
+[13/Aug/2026 23:53:24] code 404, message File not found
+[13/Aug/2026 23:53:24] "GET /favicon.ico HTTP/1.1" 404 -
+[13/Aug/2026 23:53:24] "GET /api/flipchart-index HTTP/1.1" 200 -
+[13/Aug/2026 23:53:24] "PUT /janamathics-kanban.json HTTP/1.1" 200 -
+[13/Aug/2026 23:53:30] "PUT /janamathics-kanban.json HTTP/1.1" 200 -

@@ -1,0 +1,20 @@
+{
+  "title": "__BOARD_TITLE__",
+  "slug": "__BOARD_SLUG__",
+  "boardHtml": "__BOARD_HTML__",
+  "boardJson": "__BOARD_JSON__",
+  "flipchartJson": "__FLIPCHART_JSON__",
+  "port": __BOARD_PORT__,
+  "source": "__BOARD_SOURCE__",
+  "boardDir": "__BOARD_DIR__",
+  "theme": {
+    "bg": "#1f3d2f",
+    "bg2": "#274c3a",
+    "accent": "#e2a53a",
+    "chalk": "#e8f0e6",
+    "angle": 160,
+    "spots": true,
+    "font": "segoe",
+    "lang": "auto"
+  }
+}
