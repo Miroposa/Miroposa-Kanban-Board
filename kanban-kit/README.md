@@ -7,7 +7,7 @@ Boards legst du am einfachsten über die **Manager-Oberfläche** an.
 
 Doppelklick:
 
-`docs/kanban-kit/Kanban Manager oeffnen.bat`
+`kanban-kit/Kanban Manager oeffnen.bat`
 
 Oder Desktop-Verknüpfung **„Kanban-Manager“** (im Manager oben rechts anlegen / erneuern).
 
@@ -26,12 +26,12 @@ Dort kannst du:
 - Boards löschen (nicht Janamathics)
 
 Neue Boards erben das aktuelle Manager-Theme.
-Icon-Vorrat neu erzeugen: `python docs/kanban-kit/generate_icons.py`
+Icon-Vorrat neu erzeugen: `python kanban-kit/generate_icons.py`
 
 ## CLI (optional)
 
 ```powershell
-python docs/kanban-kit/new-board.py --name "Mein Spiel"
+python kanban-kit/new-board.py --name "Mein Spiel"
 ```
 
 ## Was liegt in einem Board?
@@ -44,7 +44,7 @@ python docs/kanban-kit/new-board.py --name "Mein Spiel"
 | `*-flipchart.json` | Globales Excalidraw-Flipchart |
 | `flipcharts/` | Flipcharts pro Karte |
 | `kanban_server.py` | Lokaler Server + Schreib-API |
-| `Kanban oeffnen.bat` | Startet Server und Browser |
+| `Kanban oeffnen.bat` | Beendet ggf. alten Prozess auf dem Port, startet Server frisch, öffnet Browser |
 
 Standard-Ablage: `Downloads/<slug>/` (änderbar im Manager)
 
@@ -54,8 +54,10 @@ Standard-Ablage: `Downloads/<slug>/` (änderbar im Manager)
 - Server: `template/kanban_server.py`
 - Startinhalt: `template/board.json`
 - Manager-UI: `manager.html`
-- Nach Sync mit Janamathics: `python _build_template.py`
+- Shared Libs (eine Quelle): `theme_lib.*`, `theme_shared.css`, `i18n_lib.js` im Kit-Root
+- Template → Janamathics: `python kanban-kit/sync-janamathics.py`
 
 ## Janamathics
 
-Das bestehende Board unter `brainstorm/` bleibt unberührt (Port **8765**) und erscheint im Manager als Projekt-Board.
+Board unter `brainstorm/` (Port **8765**), erscheint im Manager.  
+Nach Template-Updates angleichen: `python kanban-kit/sync-janamathics.py` (JSON/Flipcharts bleiben erhalten).

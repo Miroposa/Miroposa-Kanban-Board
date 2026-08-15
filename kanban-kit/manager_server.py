@@ -32,6 +32,7 @@ _theme_lib = importlib.util.module_from_spec(_theme_spec)
 _theme_spec.loader.exec_module(_theme_lib)
 
 create_board = _new_board.create_board
+update_board_at = _new_board.update_board_at
 BoardError = _new_board.BoardError
 BOARDS_ROOT = _new_board.BOARDS_ROOT
 REPO_ROOT = _new_board.REPO_ROOT
@@ -52,6 +53,42 @@ ICONS_CATALOG = ICONS_DIR / "catalog.json"
 _running: dict[str, subprocess.Popen] = {}
 _lock = threading.Lock()
 _picker_lock = threading.Lock()
+_presence_lock = threading.Lock()
+_board_presence: dict[str, float] = {}
+_reload_hints: dict[str, dict[str, Any]] = {}
+PRESENCE_TTL = 45.0
+
+
+def touch_board_presence(slug: str) -> dict[str, Any] | None:
+    slug = str(slug or "").strip()
+    if not slug:
+        return None
+    now = time.time()
+    with _presence_lock:
+        _board_presence[slug] = now
+        return _reload_hints.pop(slug, None)
+
+
+def is_board_open(slug: str) -> bool:
+    slug = str(slug or "").strip()
+    if not slug:
+        return False
+    with _presence_lock:
+        ts = _board_presence.get(slug)
+    return ts is not None and (time.time() - ts) <= PRESENCE_TTL
+
+
+def queue_reload_hint(slug: str, *, card_id: str = "", card_title: str = "") -> None:
+    slug = str(slug or "").strip()
+    if not slug:
+        return
+    with _presence_lock:
+        _reload_hints[slug] = {
+            "reason": "card-copied",
+            "cardId": card_id,
+            "cardTitle": card_title,
+            "at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+        }
 
 
 def _default_settings() -> dict[str, Any]:
@@ -450,12 +487,112 @@ def resolve_preset_icon(icon_id: str) -> Path | None:
     return None
 
 
+def _creationflags() -> int:
+    if sys.platform == "win32":
+        return int(subprocess.CREATE_NO_WINDOW)  # type: ignore[attr-defined]
+    return 0
+
+
 def _port_open(port: int) -> bool:
     try:
         with socket.create_connection(("127.0.0.1", port), timeout=0.35):
             return True
     except OSError:
         return False
+
+
+def _board_http_ok(port: int, board_html: str) -> bool:
+    """Prüft, ob auf dem Port ein erreichbares Board antwortet (kein toter/falscher Listener)."""
+    path = str(board_html or "").lstrip("/") or "index.html"
+    try:
+        with socket.create_connection(("127.0.0.1", port), timeout=0.5) as sock:
+            req = (
+                f"GET /{path} HTTP/1.1\r\n"
+                f"Host: 127.0.0.1:{port}\r\n"
+                "Connection: close\r\n\r\n"
+            ).encode("ascii")
+            sock.sendall(req)
+            sock.settimeout(0.8)
+            buf = b""
+            while len(buf) < 64:
+                chunk = sock.recv(64 - len(buf))
+                if not chunk:
+                    break
+                buf += chunk
+        head = buf.decode("latin-1", "ignore")
+        return head.startswith("HTTP/1.") and " 200 " in head[:20]
+    except OSError:
+        return False
+
+
+def _pids_listening_on_port(port: int) -> list[int]:
+    """PIDs, die am Port lauschen (Windows: netstat, Fallback PowerShell)."""
+    pids: list[int] = []
+    port = int(port)
+    try:
+        out = subprocess.check_output(
+            ["netstat", "-ano", "-p", "tcp"],
+            text=True,
+            errors="ignore",
+            creationflags=_creationflags(),
+        )
+    except (OSError, subprocess.CalledProcessError):
+        out = ""
+    # bewusst locker: "TCP …:8766 … LISTENING 12345"
+    pat = re.compile(rf":{port}\s+\S+\s+LISTENING\s+(\d+)", re.I)
+    for match in pat.finditer(out):
+        pid = int(match.group(1))
+        if pid > 0 and pid not in pids:
+            pids.append(pid)
+    if pids:
+        return pids
+    if sys.platform == "win32":
+        try:
+            ps = subprocess.check_output(
+                [
+                    "powershell",
+                    "-NoProfile",
+                    "-Command",
+                    f"(Get-NetTCPConnection -LocalPort {port} -State Listen -ErrorAction SilentlyContinue)."
+                    "OwningProcess | Select-Object -Unique",
+                ],
+                text=True,
+                errors="ignore",
+                creationflags=_creationflags(),
+            )
+            for line in ps.splitlines():
+                line = line.strip()
+                if line.isdigit():
+                    pid = int(line)
+                    if pid > 0 and pid not in pids:
+                        pids.append(pid)
+        except (OSError, subprocess.CalledProcessError):
+            pass
+    return pids
+
+
+def _free_port(port: int) -> bool:
+    """Alten Listener beenden und warten, bis der Port frei ist. True = Port ist frei."""
+    for pid in _pids_listening_on_port(port):
+        if pid == os.getpid():
+            continue
+        try:
+            if sys.platform == "win32":
+                subprocess.run(
+                    ["taskkill", "/PID", str(pid), "/T", "/F"],
+                    check=False,
+                    capture_output=True,
+                    creationflags=_creationflags(),
+                )
+            else:
+                os.kill(pid, 15)
+        except OSError:
+            pass
+    for _ in range(40):
+        if not _port_open(port):
+            return True
+        time.sleep(0.15)
+    return not _port_open(port)
 
 
 def _read_board_config(folder: Path) -> dict[str, Any] | None:
@@ -651,6 +788,67 @@ def _safe_attach_name(name: str) -> str:
     return (base or "datei")[:120]
 
 
+def search_cards(query: str, *, limit: int = 40) -> list[dict[str, Any]]:
+    """Board-übergreifend in Kartentiteln und Notizen suchen."""
+    q = str(query or "").strip().lower()
+    if len(q) < 2:
+        return []
+
+    limit = max(1, min(int(limit or 40), 100))
+    title_hits: list[dict[str, Any]] = []
+    notes_hits: list[dict[str, Any]] = []
+
+    for board in list_boards():
+        try:
+            data = _load_board_data(board)
+        except BoardError:
+            continue
+        except Exception:
+            continue
+
+        col_titles: dict[str, str] = {}
+        for col in data.get("columns") or []:
+            if isinstance(col, dict) and col.get("id"):
+                col_titles[str(col["id"])] = str(col.get("title") or "")
+
+        for card in data.get("cards") or []:
+            if not isinstance(card, dict):
+                continue
+            card_id = str(card.get("id") or "").strip()
+            if not card_id:
+                continue
+            title = str(card.get("title") or "")
+            notes = str(card.get("notes") or "")
+            title_l = title.lower()
+            notes_l = notes.lower()
+            in_title = q in title_l
+            in_notes = q in notes_l
+            if not in_title and not in_notes:
+                continue
+
+            preview = " ".join(notes.split())
+            if len(preview) > 140:
+                preview = preview[:137] + "…"
+
+            hit = {
+                "cardId": card_id,
+                "title": title or "(ohne Titel)",
+                "notesPreview": preview,
+                "matchedIn": "title" if in_title else "notes",
+                "columnId": str(card.get("column") or ""),
+                "columnTitle": col_titles.get(str(card.get("column") or ""), ""),
+                "boardSlug": board["slug"],
+                "boardName": board.get("name") or board.get("title") or board["slug"],
+                "boardPort": int(board.get("port") or 0),
+            }
+            if in_title:
+                title_hits.append(hit)
+            else:
+                notes_hits.append(hit)
+
+    return (title_hits + notes_hits)[:limit]
+
+
 def board_meta(slug: str = "", path: str = "") -> dict[str, Any]:
     board = resolve_board(slug=slug, path=path)
     data = _load_board_data(board)
@@ -797,6 +995,14 @@ def copy_card_to_board(
             "url": source["url"],
         },
     }
+    target_was_open = is_board_open(target["slug"])
+    if target_was_open:
+        queue_reload_hint(
+            target["slug"],
+            card_id=new_id,
+            card_title=str(new_card.get("title") or ""),
+        )
+    result["targetWasOpen"] = target_was_open
     if open_after:
         open_board(target["slug"], card_id=new_id)
         result["opened"] = True
@@ -814,43 +1020,105 @@ def open_board(slug: str, card_id: str | None = None) -> dict[str, Any]:
         raise BoardError(f"kanban_server.py fehlt in {folder}")
 
     port = int(board["port"])
+    board_html = str(board.get("boardHtml") or "")
     url = board["url"]
     card_id = str(card_id or "").strip()
     if card_id:
         sep = "&" if "?" in url else "?"
         url = f"{url}{sep}card={quote(card_id)}"
 
-    if not _port_open(port):
-        with _lock:
-            proc = _running.get(slug)
-            if proc is None or proc.poll() is not None:
-                log_path = folder / "kanban-server.log"
-                log_file = open(log_path, "a", encoding="utf-8")  # noqa: SIM115
-                creationflags = 0
-                if sys.platform == "win32":
-                    creationflags = subprocess.CREATE_NO_WINDOW  # type: ignore[attr-defined]
-                proc = subprocess.Popen(
-                    [sys.executable, str(server_script), str(port)],
-                    cwd=str(folder),
-                    stdout=log_file,
-                    stderr=subprocess.STDOUT,
-                    creationflags=creationflags,
-                )
-                _running[slug] = proc
+    # Mehrere Boards parallel: laufenden, gesunden Server wiederverwenden
+    if _port_open(port) and _board_http_ok(port, board_html):
+        webbrowser.open(url)
+        board = find_board(slug) or board
+        board["running"] = True
+        return {"ok": True, "board": board}
 
-        ready = False
-        for _ in range(40):
-            time.sleep(0.25)
-            if _port_open(port):
-                ready = True
-                break
-        if not ready:
-            raise BoardError(f"Server startet nicht auf Port {port}")
+    # Port belegt, aber keine gültige Board-Antwort → alten Listener ersetzen
+    if _port_open(port):
+        with _lock:
+            old = _running.pop(slug, None)
+            if old is not None and old.poll() is None:
+                try:
+                    old.terminate()
+                except OSError:
+                    pass
+        if not _free_port(port):
+            raise BoardError(
+                f"Port {port} ist belegt und konnte nicht freigegeben werden. "
+                "Bitte den alten Kanban-Prozess beenden und erneut öffnen."
+            )
+
+    with _lock:
+        proc = _running.get(slug)
+        if proc is not None and proc.poll() is None:
+            webbrowser.open(url)
+            board = find_board(slug) or board
+            board["running"] = True
+            return {"ok": True, "board": board}
+        log_path = folder / "kanban-server.log"
+        log_file = open(log_path, "a", encoding="utf-8")  # noqa: SIM115
+        proc = subprocess.Popen(
+            [sys.executable, str(server_script), str(port)],
+            cwd=str(folder),
+            stdout=log_file,
+            stderr=subprocess.STDOUT,
+            creationflags=_creationflags(),
+        )
+        _running[slug] = proc
+
+    ready = False
+    for _ in range(40):
+        time.sleep(0.25)
+        if _port_open(port):
+            ready = True
+            break
+    if not ready:
+        raise BoardError(f"Server startet nicht auf Port {port}")
 
     webbrowser.open(url)
     board = find_board(slug) or board
     board["running"] = True
     return {"ok": True, "board": board}
+
+
+def stop_all_board_servers() -> dict[str, Any]:
+    """Beendet alle bekannten Board-Server (Manager-Tracking + Port-Scan)."""
+    stopped_slugs: list[str] = []
+    stopped_ports: list[int] = []
+
+    with _lock:
+        for slug, proc in list(_running.items()):
+            if proc.poll() is None:
+                try:
+                    proc.terminate()
+                    try:
+                        proc.wait(timeout=2)
+                    except subprocess.TimeoutExpired:
+                        proc.kill()
+                except OSError:
+                    pass
+            if slug not in stopped_slugs:
+                stopped_slugs.append(slug)
+        _running.clear()
+
+    seen_ports: set[int] = set()
+    for board in list_boards():
+        port = int(board.get("port") or 0)
+        if not port or port in seen_ports:
+            continue
+        seen_ports.add(port)
+        if _port_open(port):
+            _free_port(port)
+            stopped_ports.append(port)
+            slug = str(board.get("slug") or "")
+            if slug and slug not in stopped_slugs:
+                stopped_slugs.append(slug)
+
+    return {"boards": stopped_slugs, "ports": stopped_ports, "count": len(stopped_ports)}
+
+
+_HTTP_SERVER: ThreadingHTTPServer | None = None
 
 
 def delete_board(slug: str, *, confirm: bool = False) -> dict[str, Any]:
@@ -863,10 +1131,15 @@ def delete_board(slug: str, *, confirm: bool = False) -> dict[str, Any]:
         raise BoardError("Das Janamathics-Board kann hier nicht gelöscht werden.")
 
     folder = Path(board["path"])
+    port = int(board["port"])
     with _lock:
         proc = _running.pop(slug, None)
         if proc and proc.poll() is None:
-            proc.terminate()
+            try:
+                proc.terminate()
+            except OSError:
+                pass
+    _free_port(port)
 
     paths = [p for p in _load_registry() if Path(p).resolve() != folder.resolve()]
     _save_registry(paths)
@@ -911,6 +1184,22 @@ class Handler(SimpleHTTPRequestHandler):
             raise ValueError("JSON-Objekt erwartet")
         return data
 
+    def _handle_shutdown(self) -> None:
+        result = stop_all_board_servers()
+        self._send_json(200, {"ok": True, **result})
+
+        def _stop() -> None:
+            time.sleep(0.3)
+            server = globals().get("_HTTP_SERVER")
+            if server is not None:
+                try:
+                    server.shutdown()
+                except Exception:
+                    pass
+            os._exit(0)
+
+        threading.Thread(target=_stop, daemon=True).start()
+
     def do_GET(self) -> None:
         path = urlparse(self.path).path
         if path in ("/", "/index.html"):
@@ -918,6 +1207,15 @@ class Handler(SimpleHTTPRequestHandler):
             return super().do_GET()
         if path == "/api/boards":
             self._send_json(200, {"boards": list_boards()})
+            return
+        if path == "/api/cards/search":
+            qs = parse_qs(urlparse(self.path).query)
+            q = (qs.get("q") or [""])[0]
+            try:
+                limit = int((qs.get("limit") or ["40"])[0])
+            except ValueError:
+                limit = 40
+            self._send_json(200, {"ok": True, "query": q, "results": search_cards(q, limit=limit)})
             return
         if path == "/api/boards/meta":
             qs = parse_qs(urlparse(self.path).query)
@@ -969,6 +1267,9 @@ class Handler(SimpleHTTPRequestHandler):
     def do_POST(self) -> None:
         path = urlparse(self.path).path
         try:
+            if path == "/api/shutdown":
+                self._handle_shutdown()
+                return
             body = self._read_json_body()
             if path == "/api/boards":
                 slug_val = (body.get("slug") or "").strip() or slugify(str(body.get("name") or ""))
@@ -1033,6 +1334,12 @@ class Handler(SimpleHTTPRequestHandler):
                 self._send_json(200, result)
                 return
 
+            if path == "/api/boards/presence":
+                slug = str(body.get("slug") or "")
+                hint = touch_board_presence(slug)
+                self._send_json(200, {"ok": True, "reloadHint": hint})
+                return
+
             if path == "/api/cards/copy":
                 result = copy_card_to_board(
                     source_card_id=str(body.get("sourceCardId") or body.get("cardId") or ""),
@@ -1051,6 +1358,14 @@ class Handler(SimpleHTTPRequestHandler):
                     str(body.get("slug") or ""),
                     confirm=bool(body.get("confirm")),
                 )
+                self._send_json(200, result)
+                return
+
+            if path == "/api/boards/update":
+                board = find_board(str(body.get("slug") or ""))
+                if not board:
+                    raise BoardError("Board nicht gefunden.")
+                result = update_board_at(board["path"])
                 self._send_json(200, result)
                 return
 
@@ -1135,8 +1450,10 @@ class Handler(SimpleHTTPRequestHandler):
 
 
 def main() -> None:
+    global _HTTP_SERVER
     get_boards_root().mkdir(parents=True, exist_ok=True)
-    server = ThreadingHTTPServer(("127.0.0.1", MANAGER_PORT), Handler)
+    _HTTP_SERVER = ThreadingHTTPServer(("127.0.0.1", MANAGER_PORT), Handler)
+    server = _HTTP_SERVER
     url = f"http://127.0.0.1:{MANAGER_PORT}/{MANAGER_HTML}"
     print(f"Kanban-Manager: {url}", flush=True)
     print(f"Boards-Ordner: {get_boards_root()}", flush=True)

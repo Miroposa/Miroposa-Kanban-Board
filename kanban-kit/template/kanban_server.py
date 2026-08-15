@@ -4,10 +4,15 @@ from __future__ import annotations
 
 import base64
 import json
+import os
 import re
+import shutil
 import sys
+import threading
 import time
 import uuid
+import zipfile
+from datetime import datetime
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
@@ -72,9 +77,13 @@ DATA_FILE = ROOT / CFG["boardJson"]
 FLIPCHART_FILE = ROOT / CFG["flipchartJson"]
 FLIPCHART_DIR = ROOT / "flipcharts"
 ATTACHMENTS_DIR = ROOT / "attachments"
+BACKUPS_DIR = ROOT / "backups"
+VERSIONS_DIR = ROOT / "versions"
 BOARD_HTML = CFG["boardHtml"]
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else int(CFG["port"])
 MAX_ATTACHMENT_BYTES = 40 * 1024 * 1024  # 40 MB
+SNAPSHOT_KEEP = 14
+VERSION_KEEP = 30
 
 FLIPCHART_SEED = {
     "type": "excalidraw",
@@ -134,12 +143,219 @@ def _attachment_path(stored: str) -> Path | None:
     return path
 
 
+def _resolve_attachment_file(stored: str) -> Path | None:
+    path = _attachment_path(stored)
+    if path is not None and path.is_file():
+        return path
+    name = Path(str(stored or "")).name
+    if not name or not ATTACHMENTS_DIR.exists():
+        return None
+    matches = sorted(ATTACHMENTS_DIR.glob(name + "_*"))
+    if len(matches) == 1:
+        return matches[0]
+    if re.fullmatch(r"a_[0-9a-f]{12}", name):
+        matches = sorted(ATTACHMENTS_DIR.glob(name + "_*"))
+        if len(matches) == 1:
+            return matches[0]
+    return None
+
+
+def _load_board_data() -> dict:
+    ensure_data_file()
+    return json.loads(DATA_FILE.read_text(encoding="utf-8"))
+
+
+def _collect_referenced_stored(board: dict) -> set[str]:
+    refs: set[str] = set()
+    for card in board.get("cards") or []:
+        if not isinstance(card, dict):
+            continue
+        for att in card.get("attachments") or []:
+            if not isinstance(att, dict):
+                continue
+            stored = str(att.get("stored") or "").strip()
+            if stored:
+                refs.add(stored)
+    return refs
+
+
+def _collect_card_ids(board: dict) -> set[str]:
+    ids: set[str] = set()
+    for card in board.get("cards") or []:
+        if isinstance(card, dict) and card.get("id"):
+            ids.add(str(card["id"]))
+    return ids
+
+
+def _is_stored_referenced(stored: str, exclude_card_id: str | None = None) -> bool:
+    board = _load_board_data()
+    for card in board.get("cards") or []:
+        if not isinstance(card, dict):
+            continue
+        if exclude_card_id and str(card.get("id") or "") == exclude_card_id:
+            continue
+        for att in card.get("attachments") or []:
+            if isinstance(att, dict) and str(att.get("stored") or "") == stored:
+                return True
+    return False
+
+
+def _find_orphans() -> dict:
+    board = _load_board_data()
+    refs = _collect_referenced_stored(board)
+    card_ids = _collect_card_ids(board)
+
+    orphan_attachments: list[str] = []
+    if ATTACHMENTS_DIR.exists():
+        for path in ATTACHMENTS_DIR.iterdir():
+            if not path.is_file() or path.name == ".gitkeep":
+                continue
+            if path.name not in refs:
+                orphan_attachments.append(path.name)
+
+    orphan_flipcharts: list[str] = []
+    FLIPCHART_DIR.mkdir(exist_ok=True)
+    for path in FLIPCHART_DIR.glob("*.json"):
+        if path.stem not in card_ids:
+            orphan_flipcharts.append(path.stem)
+
+    return {
+        "attachments": sorted(orphan_attachments),
+        "flipcharts": sorted(orphan_flipcharts),
+        "counts": {
+            "attachments": len(orphan_attachments),
+            "flipcharts": len(orphan_flipcharts),
+        },
+    }
+
+
+def _cleanup_orphans() -> dict:
+    orphans = _find_orphans()
+    deleted_attachments: list[str] = []
+    for name in orphans["attachments"]:
+        path = ATTACHMENTS_DIR / name
+        if path.exists():
+            path.unlink()
+            deleted_attachments.append(name)
+    deleted_flipcharts: list[str] = []
+    for card_id in orphans["flipcharts"]:
+        path = FLIPCHART_DIR / f"{card_id}.json"
+        if path.exists():
+            path.unlink()
+            deleted_flipcharts.append(card_id)
+    return {
+        "deleted": {
+            "attachments": deleted_attachments,
+            "flipcharts": deleted_flipcharts,
+        },
+        "counts": {
+            "attachments": len(deleted_attachments),
+            "flipcharts": len(deleted_flipcharts),
+        },
+    }
+
+
+def _save_board_version() -> Path | None:
+    """Kopiert den aktuellen Board-Stand nach versions/ (vor Überschreiben)."""
+    if not DATA_FILE.exists():
+        return None
+    VERSIONS_DIR.mkdir(exist_ok=True)
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    dest = VERSIONS_DIR / f"{DATA_FILE.stem}-{stamp}.json"
+    # Kollisionen in derselben Sekunde vermeiden
+    n = 1
+    while dest.exists():
+        dest = VERSIONS_DIR / f"{DATA_FILE.stem}-{stamp}-{n}.json"
+        n += 1
+    shutil.copy2(DATA_FILE, dest)
+    versions = sorted(VERSIONS_DIR.glob(f"{DATA_FILE.stem}-*.json"), key=lambda p: p.stat().st_mtime)
+    while len(versions) > VERSION_KEEP:
+        old = versions.pop(0)
+        try:
+            old.unlink()
+        except OSError:
+            break
+    return dest
+
+
+def _maybe_daily_snapshot() -> Path | None:
+    """Ein Zip pro Kalendertag mit Board-Daten; behält die letzten SNAPSHOT_KEEP."""
+    BACKUPS_DIR.mkdir(exist_ok=True)
+    day = datetime.now().strftime("%Y-%m-%d")
+    dest = BACKUPS_DIR / f"snapshot-{day}.zip"
+    if dest.exists():
+        return None
+
+    with zipfile.ZipFile(dest, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        if DATA_FILE.exists():
+            zf.write(DATA_FILE, DATA_FILE.name)
+        if FLIPCHART_FILE.exists():
+            zf.write(FLIPCHART_FILE, FLIPCHART_FILE.name)
+        if CONFIG_FILE.exists():
+            zf.write(CONFIG_FILE, CONFIG_FILE.name)
+        if FLIPCHART_DIR.exists():
+            for path in FLIPCHART_DIR.glob("*.json"):
+                zf.write(path, f"flipcharts/{path.name}")
+        if ATTACHMENTS_DIR.exists():
+            for path in ATTACHMENTS_DIR.iterdir():
+                if path.is_file() and path.name != ".gitkeep":
+                    zf.write(path, f"attachments/{path.name}")
+
+    snaps = sorted(BACKUPS_DIR.glob("snapshot-*.zip"), key=lambda p: p.name)
+    while len(snaps) > SNAPSHOT_KEEP:
+        old = snaps.pop(0)
+        try:
+            old.unlink()
+        except OSError:
+            break
+    return dest
+
+
+def _list_versions() -> list[dict]:
+    VERSIONS_DIR.mkdir(exist_ok=True)
+    items = []
+    for path in sorted(VERSIONS_DIR.glob(f"{DATA_FILE.stem}-*.json"), key=lambda p: p.stat().st_mtime, reverse=True):
+        st = path.stat()
+        items.append(
+            {
+                "file": path.name,
+                "at": datetime.fromtimestamp(st.st_mtime).isoformat(timespec="seconds"),
+                "size": st.st_size,
+            }
+        )
+    return items
+
+
+def _restore_version(filename: str) -> dict:
+    name = Path(str(filename or "")).name
+    if not name or not name.endswith(".json") or ".." in name:
+        raise ValueError("Ungültiger Versionsname.")
+    if not name.startswith(DATA_FILE.stem + "-"):
+        raise ValueError("Version gehört nicht zu diesem Board.")
+    src = VERSIONS_DIR / name
+    if not src.exists():
+        raise ValueError(f"Version nicht gefunden: {name}")
+    raw = src.read_text(encoding="utf-8")
+    data = json.loads(raw)
+    if not isinstance(data, dict) or not isinstance(data.get("cards"), list):
+        raise ValueError("Versionsdatei ungültig.")
+    # Aktuellen Stand noch einmal versionieren, bevor Restore
+    _save_board_version()
+    DATA_FILE.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    return {"ok": True, "file": name, "count": len(data["cards"])}
+
+
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(ROOT), **kwargs)
 
     def log_message(self, fmt: str, *args) -> None:
         sys.stderr.write("[%s] %s\n" % (self.log_date_time_string(), fmt % args))
+
+    def end_headers(self) -> None:
+        # HTML/JS/CSS nicht cachen – sonst bleiben Nutzer nach Updates auf alter Suche
+        self.send_header("Cache-Control", "no-store")
+        super().end_headers()
 
     def _send_json(self, code: int, payload: dict | list) -> None:
         body = json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8")
@@ -285,13 +501,46 @@ class Handler(SimpleHTTPRequestHandler):
         raw = self.rfile.read(length) if length else b"{}"
         data = json.loads(raw.decode("utf-8") or "{}")
         stored = str(data.get("stored") or data.get("id") or "")
-        path = _attachment_path(stored)
+        exclude_card = str(data.get("cardId") or data.get("excludeCardId") or "").strip() or None
+        force = bool(data.get("force"))
+        path = _resolve_attachment_file(stored)
         if path is None:
-            # also allow deleting by stored filename from id prefix search
             raise ValueError("Ungültige Datei")
+        if not force and _is_stored_referenced(stored, exclude_card_id=exclude_card):
+            self._send_json(200, {"ok": True, "skipped": True, "reason": "still_referenced"})
+            return
         if path.exists():
             path.unlink()
         self._send_json(200, {"ok": True})
+
+    def _handle_flipchart_delete(self, path: str) -> None:
+        card_file = self._card_flipchart_file(path)
+        if card_file is None:
+            raise ValueError("Ungültiges Flipchart")
+        if card_file.exists():
+            card_file.unlink()
+        self._send_json(200, {"ok": True})
+
+    def _is_orphan_cleanup(self, path: str) -> bool:
+        return path in ("/api/cleanup/orphans", "/cleanup/orphans")
+
+    def _is_shutdown(self, path: str) -> bool:
+        return path in ("/api/shutdown", "/shutdown")
+
+    def _handle_shutdown(self) -> None:
+        self._send_json(200, {"ok": True})
+
+        def _stop() -> None:
+            time.sleep(0.25)
+            server = globals().get("_HTTP_SERVER")
+            if server is not None:
+                try:
+                    server.shutdown()
+                except Exception:
+                    pass
+            os._exit(0)
+
+        threading.Thread(target=_stop, daemon=True).start()
 
     def _flipchart_has_content(self, path: Path) -> tuple[bool, int]:
         if not path.exists():
@@ -328,6 +577,12 @@ class Handler(SimpleHTTPRequestHandler):
         if self._is_flipchart_index(path):
             self._send_json(200, self._build_flipchart_index())
             return
+        if self._is_orphan_cleanup(path):
+            self._send_json(200, {"ok": True, **_find_orphans()})
+            return
+        if path == "/api/versions":
+            self._send_json(200, {"ok": True, "versions": _list_versions()})
+            return
         if self._is_board(path):
             self._send_raw_json_file(DATA_FILE)
             return
@@ -353,9 +608,21 @@ class Handler(SimpleHTTPRequestHandler):
                     raise ValueError("JSON-Objekt erwartet")
                 self._handle_export(data)
                 return
+            if path == "/api/versions/restore":
+                if not isinstance(data, dict):
+                    raise ValueError("JSON-Objekt erwartet")
+                result = _restore_version(str(data.get("file") or ""))
+                self._send_json(200, result)
+                return
             if path in ("/api/theme", "/theme.json"):
                 theme = set_theme(data.get("theme") if isinstance(data, dict) else data)
                 self._send_json(200, {"ok": True, "theme": theme})
+                return
+            if self._is_orphan_cleanup(path):
+                self._send_json(200, {"ok": True, **_cleanup_orphans()})
+                return
+            if self._is_shutdown(path):
+                self._handle_shutdown()
                 return
             self.send_error(404)
         except Exception as exc:  # noqa: BLE001
@@ -366,6 +633,9 @@ class Handler(SimpleHTTPRequestHandler):
         try:
             if path in ("/api/attachments", "/attachments"):
                 self._handle_attachment_delete()
+                return
+            if self._card_flipchart_file(path) is not None:
+                self._handle_flipchart_delete(path)
                 return
             self.send_error(404)
         except Exception as exc:  # noqa: BLE001
@@ -390,8 +660,20 @@ class Handler(SimpleHTTPRequestHandler):
             if self._is_board(path):
                 if not isinstance(data, dict) or not isinstance(data.get("cards"), list):
                     raise ValueError("Erwarte Objekt mit 'cards'-Array")
+                try:
+                    _save_board_version()
+                except Exception:
+                    pass
                 DATA_FILE.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-                self._send_json(200, {"ok": True, "path": str(DATA_FILE), "count": len(data["cards"])})
+                snapshot = None
+                try:
+                    snapshot = _maybe_daily_snapshot()
+                except Exception:
+                    snapshot = None
+                payload = {"ok": True, "path": str(DATA_FILE), "count": len(data["cards"])}
+                if snapshot:
+                    payload["snapshot"] = snapshot.name
+                self._send_json(200, payload)
                 return
 
             card_file = self._card_flipchart_file(path)
@@ -416,9 +698,14 @@ class Handler(SimpleHTTPRequestHandler):
             self._send_json(400, {"ok": False, "error": str(exc)})
 
 
+_HTTP_SERVER: ThreadingHTTPServer | None = None
+
+
 def main() -> None:
+    global _HTTP_SERVER
     ensure_data_file()
-    server = ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
+    _HTTP_SERVER = ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
+    server = _HTTP_SERVER
     print(f"Kanban-Server: http://127.0.0.1:{PORT}/{BOARD_HTML}", flush=True)
     print(f"Titel: {CFG['title']}", flush=True)
     print(f"Speicherdatei: {DATA_FILE}", flush=True)

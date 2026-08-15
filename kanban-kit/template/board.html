@@ -151,6 +151,77 @@
       display: flex;
     }
 
+    .other-board-hits {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      margin: 0;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: var(--paper);
+      border: 1px solid rgba(215, 208, 188, 0.95);
+      box-shadow: var(--shadow);
+      color: var(--ink);
+      max-height: min(280px, 40vh);
+      overflow: auto;
+    }
+
+    .other-board-hits.open {
+      display: flex;
+    }
+
+    .other-board-hits-title {
+      margin: 0;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .other-board-hit {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #fff;
+      border: 1px solid var(--line);
+      text-align: left;
+    }
+
+    .other-board-hit strong {
+      display: block;
+      font-size: 0.95rem;
+      font-weight: 650;
+      color: var(--ink);
+    }
+
+    .other-board-hit .meta {
+      margin: 2px 0 0;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .other-board-hit .snippet {
+      margin: 4px 0 0;
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .other-board-hit button {
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
+    .other-board-hits-empty,
+    .other-board-hits-hint {
+      margin: 0;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
     .export-wrap {
       position: relative;
       display: inline-flex;
@@ -328,8 +399,230 @@
       flex: 1;
     }
 
+    .board.view-week {
+      grid-template-columns: minmax(160px, 0.7fr) repeat(7, minmax(140px, 1fr));
+    }
+
+    .board.view-month {
+      grid-template-columns: repeat(7, minmax(110px, 1fr));
+      gap: 8px;
+    }
+
+    .view-switch {
+      display: inline-flex;
+      gap: 4px;
+      padding: 3px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.18);
+    }
+
+    .view-switch button {
+      padding: 7px 12px;
+      font-size: 0.85rem;
+      box-shadow: none;
+    }
+
+    .view-switch button.active {
+      background: var(--accent);
+      color: #2a1d05;
+    }
+
+    .calendar-nav {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      color: var(--chalk);
+    }
+
+    .calendar-nav.visible {
+      display: flex;
+    }
+
+    .calendar-nav .cal-label {
+      min-width: 160px;
+      font-weight: 650;
+      text-align: center;
+    }
+
+    .milestone-bar {
+      display: none;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      width: fit-content;
+      max-width: 100%;
+      padding: 8px 10px;
+      border-radius: 14px;
+      background: rgba(255,253,246,0.94);
+      border: 1px solid rgba(215,208,188,0.9);
+      box-shadow: var(--shadow);
+    }
+
+    .milestone-bar.visible {
+      display: inline-flex;
+    }
+
+    .milestone-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 0.85rem;
+      font-weight: 650;
+      cursor: pointer;
+      box-shadow: none;
+    }
+
+    .milestone-chip.active {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+      background: #fff8e6;
+    }
+
+    .milestone-chip .ms-progress {
+      font-weight: 600;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .milestone-chip .ms-del {
+      border: 0;
+      background: transparent;
+      color: var(--danger);
+      cursor: pointer;
+      padding: 0 2px;
+      font: inherit;
+      box-shadow: none;
+    }
+
+    .day-cell {
+      background: rgba(255, 253, 246, 0.94);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-top: 4px solid #9a917c;
+    }
+
+    .day-cell.today {
+      border-top-color: var(--accent);
+    }
+
+    .day-cell.outside-month {
+      opacity: 0.55;
+    }
+
+    .day-cell-head {
+      padding: 8px 10px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      border-bottom: 1px solid var(--line);
+      color: var(--ink);
+    }
+
+    .day-cell-body {
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-height: 70px;
+    }
+
+    .cal-chip {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 5px 7px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: none;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .cal-chip.recurring::after {
+      content: " ↻";
+      color: var(--muted);
+    }
+
+    .cal-more {
+      font-size: 0.75rem;
+      color: var(--muted);
+      padding: 2px 4px;
+    }
+
+    .stats-row {
+      display: grid;
+      gap: 8px;
+      margin: 0 0 14px;
+    }
+
+    .stats-bar-row {
+      display: grid;
+      grid-template-columns: 120px 1fr 40px;
+      gap: 8px;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+
+    .stats-bar-track {
+      height: 10px;
+      border-radius: 999px;
+      background: #efe8d8;
+      overflow: hidden;
+    }
+
+    .stats-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 999px;
+    }
+
+    .stats-kpis {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .stats-kpi {
+      flex: 1;
+      min-width: 120px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+
+    .stats-kpi strong {
+      display: block;
+      font-size: 1.35rem;
+    }
+
+    .stats-kpi span {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
     @media (max-width: 1100px) {
       .board { grid-template-columns: repeat(auto-fit, minmax(240px, 80vw)); }
+      .board.view-week { grid-template-columns: minmax(140px, 1fr) repeat(7, minmax(120px, 1fr)); }
     }
 
     .column {
@@ -1179,6 +1472,28 @@
 
     body.placing .place-banner { display: flex; }
 
+    .reload-banner {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: #d4e8ff;
+      color: #1a3a52;
+      font-weight: 650;
+      box-shadow: var(--shadow);
+    }
+
+    .reload-banner.visible { display: flex; }
+
+    .reload-banner-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
     .place-ghost {
       position: fixed;
       z-index: 9999;
@@ -1278,8 +1593,14 @@
           <span class="filter-dot" id="color-filter-dot" hidden></span>
         </button>
         <div class="color-filters" id="color-filters" role="menu" aria-label="Nach Farbe filtern"></div>
-        <input id="search" type="search" data-i18n-placeholder="board.search" placeholder="Karten suchen…" />
+        <input id="search" type="search" data-i18n-placeholder="board.search" placeholder="Karten suchen (alle Boards)…" />
       </div>
+      <div class="view-switch" role="group" aria-label="Ansicht">
+        <button type="button" class="secondary active" data-view="board" id="btn-view-board" data-i18n="board.viewBoard">Board</button>
+        <button type="button" class="secondary" data-view="week" id="btn-view-week" data-i18n="board.viewWeek">Woche</button>
+        <button type="button" class="secondary" data-view="month" id="btn-view-month" data-i18n="board.viewMonth">Monat</button>
+      </div>
+      <button type="button" class="secondary" id="btn-stats" data-i18n="board.stats" data-i18n-title="board.stats">Statistik</button>
       <button type="button" class="secondary" id="btn-add" title="Neue Idee" data-i18n="board.addIdea" data-i18n-title="board.addIdea">+ Idee</button>
       <button type="button" class="secondary" id="btn-add-column" title="Neue Spalte" data-i18n="board.addColumn" data-i18n-title="board.addColumn">+ Spalte</button>
       <button type="button" class="secondary" id="btn-flipchart" title="Excalidraw Flipchart öffnen" data-i18n="board.flipchart" data-i18n-title="board.flipchart">Flipchart</button>
@@ -1289,12 +1610,24 @@
           <button type="button" role="menuitem" data-export="json">JSON</button>
           <button type="button" role="menuitem" data-export="xlsx">Excel (.xlsx)</button>
           <button type="button" role="menuitem" data-export="docx">Word (.docx)</button>
+          <button type="button" role="menuitem" data-export="odt">LibreOffice (.odt)</button>
           <button type="button" role="menuitem" data-export="pdf">PDF</button>
           <button type="button" role="menuitem" data-export="png">PNG (Board)</button>
+          <button type="button" role="menuitem" data-export="versions" data-i18n="board.versions">Versionen…</button>
+          <button type="button" role="menuitem" data-export="cleanup-orphans" data-i18n="board.cleanupOrphans">Verwaiste Dateien…</button>
         </div>
       </div>
-      <label class="file-btn"><span data-i18n="board.import">Import</span><input id="import" type="file" accept="application/json,.json" /></label>
+      <div class="export-wrap">
+        <button type="button" class="secondary" id="btn-import" data-i18n="board.import" aria-haspopup="true" aria-expanded="false" aria-controls="import-menu">Import</button>
+        <div class="export-menu" id="import-menu" role="menu" hidden>
+          <button type="button" role="menuitem" data-import="json" data-i18n="board.importJson">JSON (Board ersetzen)</button>
+          <button type="button" role="menuitem" data-import="csv" data-i18n="board.importCsv">CSV (Karten anhängen)</button>
+        </div>
+        <input id="import" type="file" accept="application/json,.json" hidden />
+        <input id="import-csv" type="file" accept=".csv,text/csv" hidden />
+      </div>
       <button type="button" class="secondary" id="btn-settings" title="Hintergrund &amp; Farben" data-i18n="board.settings" data-i18n-title="board.settings">Einstellungen</button>
+      <button type="button" class="secondary" id="btn-exit" title="Speichern und beenden" data-i18n="board.exit" data-i18n-title="board.exitTitle">Beenden</button>
     </div>
   </header>
   <div class="status-row">
@@ -1302,9 +1635,24 @@
     <button type="button" class="history-btn" id="btn-redo" title="Vor" data-i18n-title="board.redo" aria-label="Vor" disabled>↷</button>
     <div class="status" id="status" data-i18n="board.statusAuto">✓ Speichert automatisch in Datei</div>
   </div>
+  <div class="other-board-hits" id="other-board-hits" role="region" aria-label="Treffer in anderen Boards" hidden></div>
+  <div class="calendar-nav" id="calendar-nav">
+    <button type="button" class="secondary" id="btn-cal-prev" aria-label="Zurück">←</button>
+    <span class="cal-label" id="calendar-label"></span>
+    <button type="button" class="secondary" id="btn-cal-next" aria-label="Vor">→</button>
+    <button type="button" class="secondary" id="btn-cal-today" data-i18n="board.calToday">Heute</button>
+  </div>
+  <div class="milestone-bar" id="milestone-bar" aria-label="Ziele / Milestones"></div>
   <div class="place-banner" id="place-banner" role="status">
     <span id="place-banner-text" data-i18n="board.placeHint">Idee angelegt – jetzt auf eine Spalte oder Karte klicken</span>
     <button type="button" class="secondary" id="btn-cancel-place" data-i18n="board.cancelPlace">Abbrechen (Esc)</button>
+  </div>
+  <div class="reload-banner" id="reload-banner" role="status" aria-live="polite">
+    <span id="reload-banner-text" data-i18n="board.reloadHint">Neue Karte kopiert – Seite neu laden, um sie zu sehen.</span>
+    <div class="reload-banner-actions">
+      <button type="button" class="secondary" id="btn-reload-dismiss" data-i18n="board.reloadLater">Später</button>
+      <button type="button" id="btn-reload-now" data-i18n="board.reloadNow">Seite neu laden</button>
+    </div>
   </div>
   <main class="board" id="board" aria-label="Kanban Board"></main>
   <footer>
@@ -1339,6 +1687,19 @@
       </div>
       <label>Fällig am (optional)
         <input id="field-due" type="date" />
+      </label>
+      <label data-i18n-for="field-recurrence">Wiederholung
+        <select id="field-recurrence">
+          <option value="" data-i18n="board.recurrenceNone">Aus</option>
+          <option value="daily" data-i18n="board.recurrenceDaily">Täglich</option>
+          <option value="weekly" data-i18n="board.recurrenceWeekly">Wöchentlich</option>
+          <option value="monthly" data-i18n="board.recurrenceMonthly">Monatlich</option>
+        </select>
+      </label>
+      <label data-i18n-for="field-milestone">Ziel / Milestone
+        <select id="field-milestone">
+          <option value="">—</option>
+        </select>
       </label>
       <label class="field-column-wrap" id="field-column-wrap">Spalte
         <select id="field-column"></select>
@@ -1389,6 +1750,26 @@
     </form>
   </dialog>
 
+  <dialog id="delete-card-dialog">
+    <form method="dialog" class="dialog-body" id="delete-card-form">
+      <h3 data-i18n="board.deleteCardTitle">Karte löschen?</h3>
+      <p class="attach-hint" id="delete-card-title"></p>
+      <p class="attach-hint" data-i18n="board.deleteCardHint">Die Karte wird aus dem Board entfernt.</p>
+      <label class="checks" id="delete-card-att-row" style="flex-direction:row;align-items:center;gap:8px;" hidden>
+        <input id="delete-card-att-check" type="checkbox" checked />
+        <span id="delete-card-att-label">Anhänge mitlöschen</span>
+      </label>
+      <label class="checks" id="delete-card-flip-row" style="flex-direction:row;align-items:center;gap:8px;" hidden>
+        <input id="delete-card-flip-check" type="checkbox" checked />
+        <span data-i18n="board.deleteCardFlipchart">Flipchart mitlöschen</span>
+      </label>
+      <div class="dialog-actions">
+        <button type="button" class="secondary" id="btn-delete-card-cancel">Abbrechen</button>
+        <button type="submit" id="btn-delete-card-confirm" data-i18n="board.deleteCardConfirm">Löschen</button>
+      </div>
+    </form>
+  </dialog>
+
   <dialog id="column-editor">
     <form method="dialog" class="dialog-body" id="column-form">
       <h3>Neue Spalte</h3>
@@ -1401,9 +1782,52 @@
       <label>Farbe
         <div class="color-picker" id="field-col-color" role="listbox" aria-label="Spaltenfarbe"></div>
       </label>
+      <label class="checks" style="flex-direction:row;align-items:center;gap:8px;">
+        <input id="field-col-done" type="checkbox" />
+        <span data-i18n="board.columnDone">Erledigt-Spalte (für Statistik &amp; Wiederholung)</span>
+      </label>
       <div class="dialog-actions">
         <button type="button" class="secondary" id="btn-col-cancel">Abbrechen</button>
         <button type="submit" id="btn-col-save">Anlegen</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="stats-dialog">
+    <form method="dialog" class="dialog-body" id="stats-form">
+      <h3 data-i18n="board.statsTitle">Statistik</h3>
+      <div class="stats-kpis" id="stats-kpis"></div>
+      <div class="stats-row" id="stats-columns"></div>
+      <div class="dialog-actions">
+        <button type="submit" class="secondary" data-i18n="settings.cancel">Schließen</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="milestone-dialog">
+    <form method="dialog" class="dialog-body" id="milestone-form">
+      <h3 data-i18n="board.milestoneNew">Neues Ziel</h3>
+      <label>Titel
+        <input id="field-ms-title" type="text" required maxlength="60" />
+      </label>
+      <label data-i18n-for="field-ms-date">Zieldatum (optional)
+        <input id="field-ms-date" type="date" />
+      </label>
+      <div class="dialog-actions">
+        <button type="button" class="secondary" id="btn-ms-cancel">Abbrechen</button>
+        <button type="submit" id="btn-ms-save" data-i18n="board.milestoneSave">Anlegen</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="versions-dialog">
+    <form method="dialog" class="dialog-body" id="versions-form">
+      <h3 data-i18n="board.versionsTitle">Gespeicherte Versionen</h3>
+      <p class="attach-hint" data-i18n="board.versionsHint">Letzte Stände der Board-JSON (Server). Wiederherstellen lädt den Stand und speichert den aktuellen vorher ab.</p>
+      <div class="stats-row" id="versions-list"></div>
+      <p class="attach-hint" id="versions-status" hidden></p>
+      <div class="dialog-actions">
+        <button type="submit" class="secondary" data-i18n="settings.cancel">Schließen</button>
       </div>
     </form>
   </dialog>
@@ -1467,17 +1891,28 @@
       return {
         columns: structuredClone(DEFAULT_COLUMNS),
         cards: structuredClone(SEED_CARDS),
+        milestones: [],
       };
     }
 
-    /** @type {{columns: Array<{id:string,title:string,hint:string}>, cards: Array<{id:string,column:string,title:string,notes:string,createdAt?:string}>}} */
+    /** @type {{columns: Array<object>, cards: Array<object>, milestones?: Array<object>}} */
     let state = defaultState();
     let editId = null;
     let searchQuery = "";
+    let otherBoardHits = [];
+    let otherBoardSearchTimer = null;
+    let otherBoardSearchSeq = 0;
+    let otherBoardSearchStatus = ""; // "", "loading", "ok", "empty", "offline", "error"
     /** @type {string} "all" oder COLOR_OPTIONS.id */
     let colorFilter = "all";
     /** @type {string} all|overdue|today|week|none */
     let dueFilter = "all";
+    /** @type {"board"|"week"|"month"} */
+    let boardView = "board";
+    /** @type {Date} */
+    let calendarCursor = new Date();
+    /** @type {string} milestone id or "" */
+    let milestoneFilter = "";
     /** @type {Date|null} */
     let lastSaveAt = null;
     /** @type {Array<{at:number,state:object}>} */
@@ -1512,6 +1947,8 @@
     const fieldColColor = document.getElementById("field-col-color");
     const btnSave = document.getElementById("btn-save");
     const placeBannerText = document.getElementById("place-banner-text");
+    const reloadBanner = document.getElementById("reload-banner");
+    const reloadBannerText = document.getElementById("reload-banner-text");
     let selectedCardColor = "none";
     let selectedColColor = "yellow";
     /** @type {Array<object>} */
@@ -1548,8 +1985,8 @@
       });
     }
 
-    function bt(key) {
-      return window.KanbanI18n ? window.KanbanI18n.t(key) : key;
+    function bt(key, vars) {
+      return window.KanbanI18n ? window.KanbanI18n.t(key, vars) : key;
     }
 
     function cardColorId(card) {
@@ -1561,16 +1998,115 @@
       return new Date(d.getFullYear(), d.getMonth(), d.getDate());
     }
 
+    function toIsoDateLocal(date) {
+      const d = date instanceof Date ? date : new Date(date);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return y + "-" + m + "-" + day;
+    }
+
+    function startOfWeek(date) {
+      const d = startOfDay(date);
+      const day = d.getDay();
+      const diff = day === 0 ? -6 : 1 - day;
+      d.setDate(d.getDate() + diff);
+      return d;
+    }
+
+    function endOfWeek(date) {
+      const d = startOfWeek(date);
+      d.setDate(d.getDate() + 6);
+      return d;
+    }
+
+    function isDoneColumn(col) {
+      if (!col) return false;
+      if (col.done === true) return true;
+      if (col.done === false) return false;
+      if (String(col.id) === "ist") return true;
+      return /umgesetzt|done|fertig|erledigt/i.test(String(col.title || ""));
+    }
+
+    function milestones() {
+      return Array.isArray(state.milestones) ? state.milestones : [];
+    }
+
+    function matchesMilestoneFilter(card) {
+      if (!milestoneFilter) return true;
+      return String(card.milestoneId || "") === milestoneFilter;
+    }
+
+    function cardPassesFilters(card) {
+      if (!matchesColorFilter(card)) return false;
+      if (!matchesDueFilter(card)) return false;
+      if (!matchesMilestoneFilter(card)) return false;
+      const q = searchQuery.trim().toLowerCase();
+      if (!q) return true;
+      return (card.title + " " + (card.notes || "")).toLowerCase().includes(q);
+    }
+
+    function nextDueDate(iso, every) {
+      const base = cardDueDate({ dueDate: iso }) || startOfDay(new Date());
+      const next = new Date(base.getFullYear(), base.getMonth(), base.getDate());
+      if (every === "daily") {
+        next.setDate(next.getDate() + 1);
+      } else if (every === "weekly") {
+        next.setDate(next.getDate() + 7);
+      } else if (every === "monthly") {
+        const day = next.getDate();
+        const targetMonth = new Date(next.getFullYear(), next.getMonth() + 1, 1);
+        const lastDay = new Date(targetMonth.getFullYear(), targetMonth.getMonth() + 1, 0).getDate();
+        next.setFullYear(targetMonth.getFullYear(), targetMonth.getMonth(), Math.min(day, lastDay));
+      } else {
+        return normalizeDueValue(iso);
+      }
+      return toIsoDateLocal(next);
+    }
+
+    function buildRecurringClone(sourceCard, fromColumnId) {
+      const every = sourceCard.recurrence && sourceCard.recurrence.every;
+      if (!every) return null;
+      let anchor =
+        (sourceCard.recurrence && sourceCard.recurrence.anchorColumnId) ||
+        fromColumnId ||
+        "";
+      const anchorCol = columns().find((c) => c.id === anchor);
+      if (!anchor || isDoneColumn(anchorCol)) {
+        const firstOpen = columns().find((c) => !isDoneColumn(c));
+        anchor = firstOpen ? firstOpen.id : (columns()[0] && columns()[0].id) || "";
+      }
+      const clone = {
+        id: uid(),
+        title: String(sourceCard.title || ""),
+        notes: String(sourceCard.notes || ""),
+        column: anchor,
+        color: sourceCard.color || "none",
+        dueDate: nextDueDate(sourceCard.dueDate || toIsoDateLocal(new Date()), every),
+        createdAt: nowIsoDate(),
+        attachments: cloneAttachments(sourceCard.attachments),
+        recurrence: {
+          every: String(every),
+          anchorColumnId: anchor,
+        },
+      };
+      if (sourceCard.milestoneId) clone.milestoneId = String(sourceCard.milestoneId);
+      return clone;
+    }
+
+    function spawnRecurringCard(sourceCard, fromColumnId) {
+      const clone = buildRecurringClone(sourceCard, fromColumnId);
+      if (clone) state.cards.push(clone);
+      return clone;
+    }
+
     function normalizeDueValue(value) {
       const raw = String(value || "").trim();
       if (!raw) return "";
       if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
       const d = new Date(raw);
       if (Number.isNaN(d.getTime())) return "";
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return y + "-" + m + "-" + day;
+      return toIsoDateLocal(d);
     }
 
     function cardDueDate(card) {
@@ -1690,7 +2226,7 @@
     }
 
     function filtersActive() {
-      return colorFilter !== "all" || dueFilter !== "all";
+      return colorFilter !== "all" || dueFilter !== "all" || !!milestoneFilter;
     }
 
     function buildColorFilters() {
@@ -1959,24 +2495,32 @@
       if (IS_FILE_PROTOCOL) return;
       clearTimeout(diskSaveTimer);
       diskSaveTimer = setTimeout(async () => {
-        try {
-          const res = await fetch(BOARD_API, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(state),
-          });
-          const data = await res.json().catch(() => ({}));
-          serverSaveOk = res.ok && data.ok !== false;
-          if (!serverSaveOk) {
-            statusEl.textContent = "⚠ Speichern in Datei fehlgeschlagen – bitte über „Kanban oeffnen.bat“ starten";
-          } else {
-            updateFooterSaveDate(new Date());
-          }
-        } catch {
-          serverSaveOk = false;
-          statusEl.textContent = "⚠ Kein Kanban-Server – bitte Desktop-Verknüpfung / BAT nutzen";
-        }
+        await persistBoardNow();
       }, 200);
+    }
+
+    async function persistBoardNow() {
+      if (IS_FILE_PROTOCOL) return false;
+      clearTimeout(diskSaveTimer);
+      try {
+        const res = await fetch(BOARD_API, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(state),
+        });
+        const data = await res.json().catch(() => ({}));
+        serverSaveOk = res.ok && data.ok !== false;
+        if (!serverSaveOk) {
+          statusEl.textContent = "⚠ Speichern in Datei fehlgeschlagen – bitte über „Kanban oeffnen.bat“ starten";
+        } else {
+          updateFooterSaveDate(new Date());
+        }
+        return serverSaveOk;
+      } catch {
+        serverSaveOk = false;
+        statusEl.textContent = "⚠ Kein Kanban-Server – bitte Desktop-Verknüpfung / BAT nutzen";
+        return false;
+      }
     }
 
     function cloneBoardState(src) {
@@ -2102,19 +2646,56 @@
     }
 
     function render() {
-      const q = searchQuery.trim().toLowerCase();
+      updateViewChrome();
+      boardEl.classList.toggle("view-week", boardView === "week");
+      boardEl.classList.toggle("view-month", boardView === "month");
       boardEl.innerHTML = "";
+      if (boardView === "week") {
+        renderWeekView();
+        return;
+      }
+      if (boardView === "month") {
+        renderMonthView();
+        return;
+      }
+      renderBoardView();
+    }
 
+    function updateViewChrome() {
+      document.querySelectorAll(".view-switch [data-view]").forEach((btn) => {
+        btn.classList.toggle("active", btn.getAttribute("data-view") === boardView);
+      });
+      const calNav = document.getElementById("calendar-nav");
+      if (calNav) calNav.classList.toggle("visible", boardView === "week" || boardView === "month");
+      const msBar = document.getElementById("milestone-bar");
+      if (msBar) {
+        msBar.classList.toggle("visible", boardView === "board");
+        if (boardView === "board") renderMilestoneBar();
+      }
+      const label = document.getElementById("calendar-label");
+      if (label) {
+        if (boardView === "week") {
+          const start = startOfWeek(calendarCursor);
+          const end = endOfWeek(calendarCursor);
+          label.textContent =
+            start.toLocaleDateString(undefined, { day: "numeric", month: "short" }) +
+            " – " +
+            end.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+        } else if (boardView === "month") {
+          label.textContent = calendarCursor.toLocaleDateString(undefined, {
+            month: "long",
+            year: "numeric",
+          });
+        }
+      }
+      const addCol = document.getElementById("btn-add-column");
+      if (addCol) addCol.style.display = boardView === "board" ? "" : "none";
+    }
+
+    function renderBoardView() {
       columns().forEach((col) => {
         const cards = state.cards.filter((c) => c.column === col.id);
-        const visible = sortCardsByDue(
-          cards.filter((c) => {
-            if (!matchesColorFilter(c)) return false;
-            if (!matchesDueFilter(c)) return false;
-            if (!q) return true;
-            return (c.title + " " + (c.notes || "")).toLowerCase().includes(q);
-          })
-        );
+        const visible = sortCardsByDue(cards.filter((c) => cardPassesFilters(c)));
 
         const column = document.createElement("section");
         column.className = "column";
@@ -2223,7 +2804,6 @@
           if (placeModeId || draggingColumnId) return;
           const id = e.dataTransfer.getData("text/card-id");
           if (!id) return;
-          // Wenn direkt auf eine Karte gedroppt wurde, übernimmt die Karte den Drop
           if (e.target.closest && e.target.closest(".card")) return;
           moveCard(id, col.id);
         });
@@ -2241,13 +2821,16 @@
           }
         });
 
+        const q = searchQuery.trim().toLowerCase();
         if (!visible.length) {
           const empty = document.createElement("div");
           empty.className = "empty";
           empty.textContent = placeModeId
             ? "Hier klicken, um die Idee abzulegen"
             : q
-              ? "Keine Treffer"
+              ? otherBoardHits.length
+                ? bt("board.noLocalHits")
+                : "Keine Treffer"
               : "Zieh Ideen hierher oder + Idee";
           empty.addEventListener("click", () => {
             if (placeModeId) finishPlace(col.id);
@@ -2269,6 +2852,307 @@
 
         boardEl.appendChild(column);
       });
+    }
+
+    function bindDayDrop(el, isoDate) {
+      el.addEventListener("dragover", (e) => {
+        if (draggingColumnId) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        el.classList.add("drag-over");
+      });
+      el.addEventListener("dragleave", (e) => {
+        if (!el.contains(e.relatedTarget)) el.classList.remove("drag-over");
+      });
+      el.addEventListener("drop", (e) => {
+        e.preventDefault();
+        el.classList.remove("drag-over");
+        const id = e.dataTransfer.getData("text/card-id");
+        if (!id) return;
+        const card = state.cards.find((c) => c.id === id);
+        if (!card) return;
+        card.dueDate = isoDate || "";
+        saveState(isoDate ? "Fällig → " + isoDate : "Fälligkeit entfernt");
+        render();
+      });
+    }
+
+    function renderCalChip(card) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "cal-chip" + (card.recurrence && card.recurrence.every ? " recurring" : "");
+      btn.textContent = card.title || bt("card.untitled");
+      btn.title = card.title || "";
+      btn.draggable = true;
+      btn.addEventListener("dragstart", (e) => {
+        e.dataTransfer.setData("text/card-id", card.id);
+        e.dataTransfer.effectAllowed = "move";
+      });
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        openEditor(card.id);
+      });
+      return btn;
+    }
+
+    function renderWeekView() {
+      const weekStart = startOfWeek(calendarCursor);
+      const today = startOfDay(new Date());
+
+      const noDue = document.createElement("section");
+      noDue.className = "day-cell";
+      noDue.innerHTML = "";
+      const ndHead = document.createElement("div");
+      ndHead.className = "day-cell-head";
+      ndHead.textContent = bt("board.calNoDue");
+      const ndBody = document.createElement("div");
+      ndBody.className = "day-cell-body cards";
+      bindDayDrop(ndBody, "");
+      const undated = sortCardsByDue(
+        state.cards.filter((c) => !cardDueDate(c) && cardPassesFilters(c))
+      );
+      undated.forEach((c) => ndBody.appendChild(renderCalChip(c)));
+      if (!undated.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = "—";
+        ndBody.appendChild(empty);
+      }
+      noDue.append(ndHead, ndBody);
+      boardEl.appendChild(noDue);
+
+      for (let i = 0; i < 7; i++) {
+        const day = new Date(weekStart);
+        day.setDate(weekStart.getDate() + i);
+        const iso = toIsoDateLocal(day);
+        const cell = document.createElement("section");
+        cell.className = "day-cell" + (day.getTime() === today.getTime() ? " today" : "");
+        const head = document.createElement("div");
+        head.className = "day-cell-head";
+        head.textContent = day.toLocaleDateString(undefined, {
+          weekday: "short",
+          day: "numeric",
+          month: "short",
+        });
+        const body = document.createElement("div");
+        body.className = "day-cell-body cards";
+        bindDayDrop(body, iso);
+        const dayCards = sortCardsByDue(
+          state.cards.filter((c) => {
+            const due = cardDueDate(c);
+            return due && due.getTime() === day.getTime() && cardPassesFilters(c);
+          })
+        );
+        dayCards.forEach((c) => body.appendChild(renderCalChip(c)));
+        if (!dayCards.length) {
+          const empty = document.createElement("div");
+          empty.className = "empty";
+          empty.textContent = "—";
+          body.appendChild(empty);
+        }
+        cell.append(head, body);
+        boardEl.appendChild(cell);
+      }
+    }
+
+    function renderMonthView() {
+      const year = calendarCursor.getFullYear();
+      const month = calendarCursor.getMonth();
+      const first = new Date(year, month, 1);
+      const gridStart = startOfWeek(first);
+      const today = startOfDay(new Date());
+      const weekdayNames = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(gridStart);
+        d.setDate(gridStart.getDate() + i);
+        weekdayNames.push(d.toLocaleDateString(undefined, { weekday: "short" }));
+      }
+      // header row labels as day cells with just head
+      for (let i = 0; i < 7; i++) {
+        const lab = document.createElement("div");
+        lab.className = "day-cell-head";
+        lab.style.background = "rgba(255,253,246,0.7)";
+        lab.style.borderRadius = "10px";
+        lab.style.textAlign = "center";
+        lab.textContent = weekdayNames[i];
+        boardEl.appendChild(lab);
+      }
+
+      for (let i = 0; i < 42; i++) {
+        const day = new Date(gridStart);
+        day.setDate(gridStart.getDate() + i);
+        const iso = toIsoDateLocal(day);
+        const cell = document.createElement("section");
+        cell.className =
+          "day-cell" +
+          (day.getTime() === today.getTime() ? " today" : "") +
+          (day.getMonth() !== month ? " outside-month" : "");
+        const head = document.createElement("div");
+        head.className = "day-cell-head";
+        head.textContent = String(day.getDate());
+        const body = document.createElement("div");
+        body.className = "day-cell-body cards";
+        bindDayDrop(body, iso);
+        const dayCards = sortCardsByDue(
+          state.cards.filter((c) => {
+            const due = cardDueDate(c);
+            return due && due.getTime() === day.getTime() && cardPassesFilters(c);
+          })
+        );
+        const maxShow = 3;
+        dayCards.slice(0, maxShow).forEach((c) => body.appendChild(renderCalChip(c)));
+        if (dayCards.length > maxShow) {
+          const more = document.createElement("div");
+          more.className = "cal-more";
+          more.textContent = "+" + (dayCards.length - maxShow);
+          body.appendChild(more);
+        }
+        cell.append(head, body);
+        boardEl.appendChild(cell);
+      }
+    }
+
+    function renderMilestoneBar() {
+      const bar = document.getElementById("milestone-bar");
+      if (!bar) return;
+      bar.innerHTML = "";
+
+      // „Alle Ziele“ nur sichtbar, wenn ein Ziel-Filter aktiv ist → Filter zurücksetzen
+      if (milestoneFilter) {
+        const allBtn = document.createElement("button");
+        allBtn.type = "button";
+        allBtn.className = "milestone-chip";
+        allBtn.textContent = bt("board.milestoneAll");
+        allBtn.title = bt("board.milestoneAllTitle");
+        allBtn.addEventListener("click", () => {
+          milestoneFilter = "";
+          if (statusEl) {
+            statusEl.textContent = "✓ " + bt("board.milestoneFilterCleared");
+          }
+          render();
+        });
+        bar.appendChild(allBtn);
+      }
+
+      for (const ms of milestones()) {
+        const linked = state.cards.filter((c) => String(c.milestoneId || "") === ms.id);
+        const doneCount = linked.filter((c) => {
+          const col = columns().find((x) => x.id === c.column);
+          return isDoneColumn(col);
+        }).length;
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "milestone-chip" + (milestoneFilter === ms.id ? " active" : "");
+        chip.title = bt("board.milestoneFilterTitle", { name: ms.title });
+        const title = document.createElement("span");
+        title.textContent = ms.title;
+        const prog = document.createElement("span");
+        prog.className = "ms-progress";
+        prog.textContent = doneCount + "/" + linked.length;
+        if (ms.targetDate) prog.textContent += " · " + ms.targetDate;
+        chip.append(title, prog);
+        chip.addEventListener("click", () => {
+          const next = milestoneFilter === ms.id ? "" : ms.id;
+          milestoneFilter = next;
+          if (statusEl) {
+            statusEl.textContent = next
+              ? "✓ " + bt("board.milestoneFilterOn", { name: ms.title })
+              : "✓ " + bt("board.milestoneFilterCleared");
+          }
+          render();
+        });
+        const del = document.createElement("button");
+        del.type = "button";
+        del.className = "ms-del";
+        del.textContent = "×";
+        del.title = bt("board.milestoneDelete");
+        del.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (!confirm(bt("board.milestoneDeleteConfirm", { name: ms.title }))) return;
+          state.milestones = milestones().filter((m) => m.id !== ms.id);
+          state.cards.forEach((c) => {
+            if (String(c.milestoneId || "") === ms.id) delete c.milestoneId;
+          });
+          if (milestoneFilter === ms.id) milestoneFilter = "";
+          saveState("Milestone gelöscht");
+          render();
+        });
+        chip.appendChild(del);
+        bar.appendChild(chip);
+      }
+
+      const add = document.createElement("button");
+      add.type = "button";
+      add.className = "milestone-chip";
+      add.textContent = bt("board.milestoneAdd");
+      add.addEventListener("click", () => {
+        const dlg = document.getElementById("milestone-dialog");
+        const title = document.getElementById("field-ms-title");
+        const date = document.getElementById("field-ms-date");
+        if (title) title.value = "";
+        if (date) date.value = "";
+        if (dlg) dlg.showModal();
+      });
+      bar.appendChild(add);
+    }
+
+    function openStatsDialog() {
+      const dlg = document.getElementById("stats-dialog");
+      const kpis = document.getElementById("stats-kpis");
+      const colsEl = document.getElementById("stats-columns");
+      if (!dlg || !kpis || !colsEl) return;
+
+      const weekStart = startOfWeek(new Date());
+      const weekEnd = endOfWeek(new Date());
+      weekEnd.setHours(23, 59, 59, 999);
+      const doneThisWeek = state.cards.filter((c) => {
+        if (!c.completedAt) return false;
+        const t = new Date(c.completedAt);
+        if (Number.isNaN(t.getTime())) return false;
+        return t >= weekStart && t <= weekEnd;
+      }).length;
+      const overdue = state.cards.filter((c) => {
+        const col = columns().find((x) => x.id === c.column);
+        if (isDoneColumn(col)) return false;
+        return dueStatus(c) === "overdue";
+      }).length;
+
+      kpis.innerHTML = "";
+      const kpiDefs = [
+        { n: String(state.cards.length), label: bt("board.statsTotal") },
+        { n: String(doneThisWeek), label: bt("board.statsDoneWeek") },
+        { n: String(overdue), label: bt("board.statsOverdue") },
+      ];
+      for (const k of kpiDefs) {
+        const el = document.createElement("div");
+        el.className = "stats-kpi";
+        el.innerHTML = "<strong></strong><span></span>";
+        el.querySelector("strong").textContent = k.n;
+        el.querySelector("span").textContent = k.label;
+        kpis.appendChild(el);
+      }
+
+      colsEl.innerHTML = "";
+      const max = Math.max(1, ...columns().map((col) => state.cards.filter((c) => c.column === col.id).length));
+      for (const col of columns()) {
+        const count = state.cards.filter((c) => c.column === col.id).length;
+        const row = document.createElement("div");
+        row.className = "stats-bar-row";
+        const name = document.createElement("div");
+        name.textContent = col.title;
+        const track = document.createElement("div");
+        track.className = "stats-bar-track";
+        const fill = document.createElement("div");
+        fill.className = "stats-bar-fill";
+        fill.style.width = Math.round((count / max) * 100) + "%";
+        track.appendChild(fill);
+        const num = document.createElement("div");
+        num.textContent = String(count);
+        row.append(name, track, num);
+        colsEl.appendChild(row);
+      }
+
+      dlg.showModal();
     }
 
     function clearDropHints() {
@@ -2422,6 +3306,26 @@
         dueEl.textContent = "Fällig am " + formatCardDate(dueIso);
         meta.appendChild(dueEl);
       }
+      if (card.recurrence && card.recurrence.every) {
+        const recEl = document.createElement("p");
+        recEl.className = "card-due";
+        const map = {
+          daily: bt("board.recurrenceDaily"),
+          weekly: bt("board.recurrenceWeekly"),
+          monthly: bt("board.recurrenceMonthly"),
+        };
+        recEl.textContent = "↻ " + (map[card.recurrence.every] || card.recurrence.every);
+        meta.appendChild(recEl);
+      }
+      if (card.milestoneId) {
+        const ms = milestones().find((m) => m.id === card.milestoneId);
+        if (ms) {
+          const msEl = document.createElement("p");
+          msEl.className = "card-due";
+          msEl.textContent = "🎯 " + ms.title;
+          meta.appendChild(msEl);
+        }
+      }
 
       const actions = document.createElement("div");
       actions.className = "card-actions";
@@ -2515,13 +3419,241 @@
     }
 
     function deleteCard(id) {
+      openDeleteCardDialog(id);
+    }
+
+    let pendingDeleteId = null;
+    let pendingDeleteAttachments = [];
+    const deleteCardDialog = document.getElementById("delete-card-dialog");
+
+    function mergeAttachmentsForDelete(card, extra) {
+      const map = new Map();
+      const add = (list) => {
+        for (const a of list || []) {
+          if (!a) continue;
+          const key = a.stored || a.id || a.url || a.name;
+          if (!key || map.has(key)) continue;
+          map.set(key, a);
+        }
+      };
+      add(card && card.attachments);
+      add(extra);
+      return [...map.values()];
+    }
+
+    function openDeleteCardDialog(id, extraAttachments) {
       const card = state.cards.find((c) => c.id === id);
       if (!card) return;
-      if (!confirm("Karte löschen?\n\n„" + card.title + "“")) return;
+      pendingDeleteId = id;
+      pendingDeleteAttachments = mergeAttachmentsForDelete(card, extraAttachments);
+      document.getElementById("delete-card-title").textContent = "„" + card.title + "“";
+      const atts = pendingDeleteAttachments;
+      const attRow = document.getElementById("delete-card-att-row");
+      const attCheck = document.getElementById("delete-card-att-check");
+      const attLabel = document.getElementById("delete-card-att-label");
+      if (atts.length) {
+        attRow.hidden = false;
+        attCheck.checked = true;
+        attLabel.textContent = bt("board.deleteCardAttachments", { n: atts.length });
+      } else {
+        attRow.hidden = true;
+        attCheck.checked = false;
+      }
+      const flipRow = document.getElementById("delete-card-flip-row");
+      const flipCheck = document.getElementById("delete-card-flip-check");
+      if (flipchartHasContent(id)) {
+        flipRow.hidden = false;
+        flipCheck.checked = true;
+      } else {
+        flipRow.hidden = true;
+        flipCheck.checked = false;
+      }
+      deleteCardDialog.showModal();
+    }
+
+    async function deleteStoredAttachments(atts) {
+      for (const att of atts || []) {
+        const stored = att && (att.stored || att.id);
+        if (!stored) continue;
+        try {
+          await fetch("/api/attachments", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ stored, force: true }),
+          });
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+
+    async function confirmDeleteCard() {
+      const id = pendingDeleteId;
+      if (!id) return;
+      const delAtt = document.getElementById("delete-card-att-check").checked;
+      const delFlip = document.getElementById("delete-card-flip-check").checked;
+      const attsToDelete = delAtt ? pendingDeleteAttachments.slice() : [];
+      deleteCardDialog.close();
+      pendingDeleteId = null;
+      pendingDeleteAttachments = [];
+
       state.cards = state.cards.filter((c) => c.id !== id);
-      saveState("Karte gelöscht");
+
+      if (!IS_FILE_PROTOCOL) {
+        await persistBoardNow();
+        if (delAtt && attsToDelete.length) {
+          await deleteStoredAttachments(attsToDelete);
+        }
+        if (delFlip) {
+          try {
+            await fetch("/flipcharts/" + encodeURIComponent(id) + ".json", { method: "DELETE" });
+          } catch {
+            /* ignore */
+          }
+          try {
+            localStorage.removeItem(flipchartLsKey(id));
+          } catch {
+            /* ignore */
+          }
+          setFlipchartFilled(id, 0);
+        }
+      }
+
+      saveState(bt("board.deleteCardDone"));
       render();
     }
+
+    async function fetchBoardApiJson(url, opts) {
+      const res = await fetch(url, opts);
+      const text = await res.text();
+      const ct = (res.headers.get("content-type") || "").toLowerCase();
+      if (!ct.includes("json") && /^\s*</.test(text)) {
+        throw new Error(bt("board.cleanupNeedsServerRestart"));
+      }
+      let data;
+      try {
+        data = JSON.parse(text || "{}");
+      } catch {
+        throw new Error(bt("board.cleanupNeedsServerRestart"));
+      }
+      if (!res.ok || data.ok === false) {
+        throw new Error(data.error || ("Server-Fehler (" + res.status + ")"));
+      }
+      return data;
+    }
+
+    async function cleanupOrphans() {
+      if (IS_FILE_PROTOCOL) {
+        alert(bt("board.cleanupNeedsServer"));
+        return;
+      }
+      const data = await fetchBoardApiJson("/api/cleanup/orphans", { cache: "no-store" });
+      const nAtt = (data.counts && data.counts.attachments) || 0;
+      const nFlip = (data.counts && data.counts.flipcharts) || 0;
+      if (nAtt + nFlip === 0) {
+        alert(bt("board.cleanupNone"));
+        return;
+      }
+      const msg = bt("board.cleanupConfirm", { attachments: nAtt, flipcharts: nFlip });
+      if (!confirm(msg)) return;
+      const result = await fetchBoardApiJson("/api/cleanup/orphans", { method: "POST" });
+      const dAtt = (result.counts && result.counts.attachments) || 0;
+      const dFlip = (result.counts && result.counts.flipcharts) || 0;
+      await refreshFlipchartIndex();
+      render();
+      statusEl.textContent = bt("board.cleanupDone", { attachments: dAtt, flipcharts: dFlip });
+    }
+
+    function flushEditorIfOpen() {
+      if (!editId) return;
+      const card = state.cards.find((c) => c.id === editId);
+      if (!card) return;
+      const title = fieldTitle.value.trim();
+      if (title) card.title = title;
+      card.notes = fieldNotes.value.trim();
+      card.column = fieldColumn.value || card.column;
+      card.color = selectedCardColor || card.color || "none";
+      card.dueDate = fieldDue ? normalizeDueValue(fieldDue.value) : card.dueDate;
+      card.attachments = cloneAttachments(editorAttachments);
+    }
+
+    async function flushFlipchartSaveNow() {
+      clearTimeout(flipchartSaveTimer);
+      if (!flipchartScene || IS_FILE_PROTOCOL) return;
+      const contextId = flipchartContextId || "global";
+      try {
+        await fetch(flipchartApi(contextId), {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(flipchartScene),
+        });
+      } catch {
+        /* ignore */
+      }
+    }
+
+    let boardExiting = false;
+
+    async function exitBoard() {
+      if (!confirm(bt("board.exitConfirm"))) return;
+      boardExiting = true;
+      const btn = document.getElementById("btn-exit");
+      if (btn) btn.disabled = true;
+      statusEl.textContent = bt("board.exitSaving");
+      try {
+        if (document.getElementById("flipchart-overlay").classList.contains("open")) {
+          closeFlipchart();
+        }
+        if (editor.open) {
+          flushEditorIfOpen();
+          editor.close();
+        }
+        clearTimeout(diskSaveTimer);
+        clearTimeout(fileSaveTimer);
+        await flushFlipchartSaveNow();
+        if (fileHandle) {
+          try {
+            await writeStateToFile();
+          } catch {
+            /* ignore */
+          }
+        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        if (!IS_FILE_PROTOCOL) {
+          await persistBoardNow();
+          try {
+            await fetch("/api/shutdown", { method: "POST" });
+          } catch {
+            /* Server beendet sich ggf. schon */
+          }
+        }
+        statusEl.textContent = bt("board.exitDone");
+        window.close();
+        setTimeout(() => {
+          alert(bt("board.exitManual"));
+        }, 400);
+      } catch (err) {
+        alert(err && err.message ? err.message : String(err));
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    function beaconBoardShutdown() {
+      if (IS_FILE_PROTOCOL) return;
+      try {
+        navigator.sendBeacon(
+          "/api/shutdown",
+          new Blob(["{}"], { type: "application/json" })
+        );
+      } catch {
+        /* ignore */
+      }
+    }
+
+    window.addEventListener("pagehide", () => {
+      if (boardExiting || IS_FILE_PROTOCOL) return;
+      beaconBoardShutdown();
+    });
 
     function deleteColumn(columnId) {
       if (columns().length <= 1) {
@@ -2577,6 +3709,8 @@
       if (placeModeId) return;
       document.getElementById("field-col-title").value = "";
       document.getElementById("field-col-hint").value = "";
+      const doneCb = document.getElementById("field-col-done");
+      if (doneCb) doneCb.checked = false;
       selectedColColor = "yellow";
       buildColorPicker(fieldColColor, selectedColColor, (id) => {
         selectedColColor = id;
@@ -2585,7 +3719,7 @@
       document.getElementById("field-col-title").focus();
     }
 
-    function addColumn(title, hint, colorId) {
+    function addColumn(title, hint, colorId, doneFlag) {
       const name = String(title || "").trim();
       if (!name) return;
       const col = {
@@ -2594,6 +3728,7 @@
         hint: String(hint || "").trim(),
         color: colorId || "yellow",
       };
+      if (doneFlag === true) col.done = true;
       state.columns.push(col);
       refreshColumnSelect(col.id);
       saveState("Spalte angelegt");
@@ -2631,13 +3766,29 @@
       }
       data.columns = data.columns
         .filter((c) => c && c.id && c.title)
-        .map((c) => ({
-          id: String(c.id),
-          title: String(c.title),
-          hint: c.hint ? String(c.hint) : "",
-          color: c.color || DEFAULT_COLUMN_COLOR[c.id] || "none",
-        }));
+        .map((c) => {
+          const col = {
+            id: String(c.id),
+            title: String(c.title),
+            hint: c.hint ? String(c.hint) : "",
+            color: c.color || DEFAULT_COLUMN_COLOR[c.id] || "none",
+          };
+          if (c.done === true) col.done = true;
+          if (c.done === false) col.done = false;
+          return col;
+        });
       if (!data.columns.length) data.columns = structuredClone(DEFAULT_COLUMNS);
+
+      if (!Array.isArray(data.milestones)) data.milestones = [];
+      data.milestones = data.milestones
+        .filter((m) => m && m.id && m.title)
+        .map((m) => ({
+          id: String(m.id),
+          title: String(m.title),
+          targetDate: normalizeDueValue(m.targetDate),
+          color: m.color ? String(m.color) : "",
+        }));
+      const milestoneIds = new Set(data.milestones.map((m) => m.id));
 
       const valid = new Set(data.columns.map((c) => c.id));
       const fallback = data.columns.find((c) => c.id === "ist")?.id || data.columns[0].id;
@@ -2648,6 +3799,27 @@
         delete card.tag;
         if (!card.color) card.color = "none";
         card.dueDate = normalizeDueValue(card.dueDate);
+        if (card.completedAt) card.completedAt = String(card.completedAt);
+        else delete card.completedAt;
+        if (card.milestoneId && milestoneIds.has(String(card.milestoneId))) {
+          card.milestoneId = String(card.milestoneId);
+        } else {
+          delete card.milestoneId;
+        }
+        if (card.recurrence && typeof card.recurrence === "object") {
+          const every = String(card.recurrence.every || "");
+          if (every === "daily" || every === "weekly" || every === "monthly") {
+            card.recurrence = {
+              every,
+              anchorColumnId: String(card.recurrence.anchorColumnId || ""),
+            };
+            if (!card.recurrence.anchorColumnId) delete card.recurrence.anchorColumnId;
+          } else {
+            delete card.recurrence;
+          }
+        } else {
+          delete card.recurrence;
+        }
         if (!Array.isArray(card.attachments)) card.attachments = [];
         card.attachments = card.attachments
           .filter((a) => a && (a.url || a.stored || a.name))
@@ -2683,8 +3855,24 @@
       if (!card) return;
       if (anchorId && id === anchorId) return;
 
+      const fromColumnId = card.column;
+      const fromCol = columns().find((c) => c.id === fromColumnId);
+      const toCol = columns().find((c) => c.id === columnId);
+      const wasDone = isDoneColumn(fromCol);
+      const nowDone = isDoneColumn(toCol);
+      let spawned = null;
+
       const rest = state.cards.filter((c) => c.id !== id);
       card.column = columnId;
+
+      if (nowDone && !wasDone) {
+        card.completedAt = nowIsoDate();
+        if (card.recurrence && card.recurrence.every) {
+          spawned = buildRecurringClone(card, fromColumnId);
+        }
+      } else if (!nowDone && wasDone) {
+        delete card.completedAt;
+      }
 
       if (anchorId) {
         const idx = rest.findIndex((c) => c.id === anchorId);
@@ -2713,6 +3901,8 @@
         byCol[columnId].push(card);
         state.cards = columns().flatMap((col) => byCol[col.id] || []);
       }
+
+      if (spawned) state.cards.push(spawned);
 
       const colTitle = columns().find((c) => c.id === columnId)?.title || columnId;
       saveState("Verschoben → " + colTitle);
@@ -2899,8 +4089,26 @@
       }
     }
 
+    function managerUnreachableMessage() {
+      return (
+        "Kanban-Manager nicht erreichbar unter " +
+        MANAGER_API +
+        ".\nBitte „Kanban Manager oeffnen.bat“ (oder die Desktop-Verknüpfung) starten."
+      );
+    }
+
     async function managerFetch(path, opts) {
-      const res = await fetch(MANAGER_API + path, opts || {});
+      let res;
+      try {
+        res = await fetch(MANAGER_API + path, opts || {});
+      } catch (err) {
+        const raw = err && err.message ? err.message : String(err);
+        // Typisch: Failed to fetch / NetworkError wenn Port 8760 nicht läuft
+        if (/failed to fetch|networkerror|load failed|network request failed/i.test(raw)) {
+          throw new Error(managerUnreachableMessage());
+        }
+        throw new Error(managerUnreachableMessage() + "\n\n(" + raw + ")");
+      }
       const data = await res.json().catch(() => ({}));
       if (!res.ok || data.ok === false) {
         throw new Error(data.error || ("Manager-Fehler (" + res.status + ")"));
@@ -2920,11 +4128,206 @@
           }),
         });
       } catch (err) {
-        alert(
-          (err && err.message ? err.message : String(err)) +
-            "\n\nBitte den Kanban-Manager starten (Desktop-Verknüpfung)."
-        );
+        alert(err && err.message ? err.message : String(err));
       }
+    }
+
+    function setOtherBoardHitsOpen(open) {
+      const panel = document.getElementById("other-board-hits");
+      if (!panel) return;
+      panel.classList.toggle("open", !!open);
+      panel.hidden = !open;
+    }
+
+    function renderOtherBoardHits() {
+      const panel = document.getElementById("other-board-hits");
+      if (!panel) return;
+      const q = searchQuery.trim();
+      panel.innerHTML = "";
+
+      if (q.length < 2) {
+        setOtherBoardHitsOpen(false);
+        return;
+      }
+
+      const title = document.createElement("p");
+      title.className = "other-board-hits-title";
+      title.textContent = bt("board.otherBoardsTitle");
+      panel.appendChild(title);
+
+      if (otherBoardSearchStatus === "loading") {
+        const hint = document.createElement("p");
+        hint.className = "other-board-hits-hint";
+        hint.textContent = bt("board.otherBoardsSearching");
+        panel.appendChild(hint);
+        setOtherBoardHitsOpen(true);
+        return;
+      }
+
+      if (otherBoardSearchStatus === "offline") {
+        const hint = document.createElement("p");
+        hint.className = "other-board-hits-hint";
+        hint.textContent = bt("board.otherBoardsOffline");
+        panel.appendChild(hint);
+        setOtherBoardHitsOpen(true);
+        return;
+      }
+
+      if (otherBoardSearchStatus === "error") {
+        const hint = document.createElement("p");
+        hint.className = "other-board-hits-hint";
+        hint.textContent = bt("board.otherBoardsError");
+        panel.appendChild(hint);
+        setOtherBoardHitsOpen(true);
+        return;
+      }
+
+      if (!otherBoardHits.length) {
+        const empty = document.createElement("p");
+        empty.className = "other-board-hits-empty";
+        empty.textContent = bt("board.otherBoardsEmpty");
+        panel.appendChild(empty);
+        setOtherBoardHitsOpen(true);
+        return;
+      }
+
+      for (const hit of otherBoardHits) {
+        const row = document.createElement("div");
+        row.className = "other-board-hit";
+        row.setAttribute("role", "option");
+
+        const left = document.createElement("div");
+        const strong = document.createElement("strong");
+        strong.textContent = hit.title || bt("card.untitled");
+        left.appendChild(strong);
+
+        const meta = document.createElement("p");
+        meta.className = "meta";
+        const parts = [hit.boardName || hit.boardSlug];
+        if (hit.columnTitle) parts.push(hit.columnTitle);
+        if (hit.matchedIn === "notes") parts.push(bt("card.matchNotes"));
+        meta.textContent = parts.filter(Boolean).join(" · ");
+        left.appendChild(meta);
+
+        if (hit.notesPreview && hit.matchedIn === "notes") {
+          const snip = document.createElement("p");
+          snip.className = "snippet";
+          snip.textContent = hit.notesPreview;
+          left.appendChild(snip);
+        }
+
+        const openBtn = document.createElement("button");
+        openBtn.type = "button";
+        openBtn.textContent = bt("board.openOtherBoard");
+        openBtn.title = bt("board.openOtherBoardTitle", {
+          board: hit.boardName || hit.boardSlug || "",
+        });
+        openBtn.addEventListener("click", async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          openBtn.disabled = true;
+          try {
+            await openLinkedSource({
+              boardSlug: hit.boardSlug,
+              cardId: hit.cardId,
+            });
+          } finally {
+            openBtn.disabled = false;
+          }
+        });
+
+        row.append(left, openBtn);
+        panel.appendChild(row);
+      }
+
+      setOtherBoardHitsOpen(true);
+    }
+
+    async function runOtherBoardSearch(query) {
+      const q = String(query || "").trim();
+      const seq = ++otherBoardSearchSeq;
+
+      if (q.length < 2 || IS_FILE_PROTOCOL) {
+        otherBoardHits = [];
+        otherBoardSearchStatus = "";
+        renderOtherBoardHits();
+        render();
+        return;
+      }
+
+      otherBoardSearchStatus = "loading";
+      renderOtherBoardHits();
+
+      try {
+        const data = await managerFetch(
+          "/api/cards/search?q=" + encodeURIComponent(q) + "&limit=40"
+        );
+        if (seq !== otherBoardSearchSeq) return;
+        const results = Array.isArray(data.results) ? data.results : [];
+        otherBoardHits = results.filter((hit) => hit && hit.boardSlug && hit.boardSlug !== BOARD_SLUG);
+        otherBoardSearchStatus = otherBoardHits.length ? "ok" : "empty";
+        renderOtherBoardHits();
+        render();
+      } catch (err) {
+        if (seq !== otherBoardSearchSeq) return;
+        otherBoardHits = [];
+        const msg = err && err.message ? String(err.message) : "";
+        otherBoardSearchStatus = /nicht erreichbar|Manager/i.test(msg) ? "offline" : "error";
+        renderOtherBoardHits();
+        render();
+      }
+    }
+
+    function scheduleOtherBoardSearch() {
+      clearTimeout(otherBoardSearchTimer);
+      otherBoardSearchTimer = setTimeout(() => {
+        runOtherBoardSearch(searchQuery).catch(() => {});
+      }, 220);
+    }
+
+    function showReloadBanner(hint) {
+      if (!reloadBanner) return;
+      const cardTitle = hint && hint.cardTitle ? String(hint.cardTitle).trim() : "";
+      if (reloadBannerText) {
+        reloadBannerText.textContent = cardTitle
+          ? bt("board.reloadHintNamed").replace("{title}", cardTitle)
+          : bt("board.reloadHint");
+      }
+      reloadBanner.classList.add("visible");
+    }
+
+    function hideReloadBanner() {
+      if (reloadBanner) reloadBanner.classList.remove("visible");
+    }
+
+    function maybeShowReloadHint(hint) {
+      if (!hint || hint.reason !== "card-copied") return;
+      const cardId = hint.cardId ? String(hint.cardId) : "";
+      if (cardId && state.cards.some((c) => c.id === cardId)) return;
+      showReloadBanner(hint);
+    }
+
+    async function pingBoardPresence() {
+      if (IS_FILE_PROTOCOL || !BOARD_SLUG) return;
+      try {
+        const data = await managerFetch("/api/boards/presence", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ slug: BOARD_SLUG }),
+        });
+        maybeShowReloadHint(data.reloadHint);
+      } catch {
+        /* Manager optional – Board bleibt nutzbar */
+      }
+    }
+
+    function startBoardPresence() {
+      if (IS_FILE_PROTOCOL || !BOARD_SLUG) return;
+      pingBoardPresence();
+      setInterval(pingBoardPresence, 15000);
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") pingBoardPresence();
+      });
     }
 
     function setCopyStatus(text, kind) {
@@ -2995,10 +4398,7 @@
         await loadCopyBoardColumns(copyBoardSelect.value);
         copyDialog.showModal();
       } catch (err) {
-        alert(
-          (err && err.message ? err.message : String(err)) +
-            "\n\nBitte den Kanban-Manager starten (Port 8760)."
-        );
+        alert(err && err.message ? err.message : String(err));
       }
     }
 
@@ -3033,19 +4433,88 @@
             openAfter: !!(copyOpenAfter && copyOpenAfter.checked),
           }),
         });
-        setCopyStatus(
-          "Kopiert nach „" +
-            ((result.target && (result.target.title || result.target.slug)) || targetSlug) +
-            "“.",
-          "ok"
-        );
+        const targetName =
+          (result.target && (result.target.title || result.target.slug)) || targetSlug;
+        let statusText = bt("board.copyDone").replace("{name}", targetName);
+        if (result.targetWasOpen) {
+          statusText += " " + bt("board.copyTargetOpen");
+        }
+        setCopyStatus(statusText, "ok");
         statusEl.textContent = "✓ Karte in anderes Board kopiert";
-        setTimeout(() => copyDialog.close(), 700);
+        setTimeout(() => copyDialog.close(), result.targetWasOpen ? 2800 : 700);
       } catch (err) {
         setCopyStatus(err.message || String(err), "err");
       } finally {
         copyBusy = false;
       }
+    }
+
+    function refreshMilestoneSelect(selectedId) {
+      const sel = document.getElementById("field-milestone");
+      if (!sel) return;
+      const cur = selectedId || "";
+      sel.innerHTML = "";
+      const none = document.createElement("option");
+      none.value = "";
+      none.textContent = "—";
+      sel.appendChild(none);
+      for (const ms of milestones()) {
+        const opt = document.createElement("option");
+        opt.value = ms.id;
+        opt.textContent = ms.title;
+        if (ms.id === cur) opt.selected = true;
+        sel.appendChild(opt);
+      }
+    }
+
+    function applyCardMetaFromEditor(card, dueDate, attachments) {
+      const fromColumnId = card.column;
+      const nextColumnId = fieldColumn.value;
+      card.title = fieldTitle.value.trim();
+      card.notes = fieldNotes.value.trim();
+      card.column = nextColumnId;
+      card.color = selectedCardColor || "none";
+      card.dueDate = dueDate;
+      card.attachments = attachments;
+      delete card.tag;
+
+      const msSel = document.getElementById("field-milestone");
+      const msVal = msSel ? msSel.value : "";
+      if (msVal) card.milestoneId = msVal;
+      else delete card.milestoneId;
+
+      const recSel = document.getElementById("field-recurrence");
+      const every = recSel ? recSel.value : "";
+      if (every === "daily" || every === "weekly" || every === "monthly") {
+        card.recurrence = {
+          every,
+          anchorColumnId:
+            (card.recurrence && card.recurrence.anchorColumnId) ||
+            (isDoneColumn(columns().find((c) => c.id === fromColumnId))
+              ? ""
+              : fromColumnId) ||
+            nextColumnId,
+        };
+        if (!card.recurrence.anchorColumnId || isDoneColumn(columns().find((c) => c.id === card.recurrence.anchorColumnId))) {
+          const firstOpen = columns().find((c) => !isDoneColumn(c));
+          if (firstOpen) card.recurrence.anchorColumnId = firstOpen.id;
+        }
+      } else {
+        delete card.recurrence;
+      }
+
+      const wasDone = isDoneColumn(columns().find((c) => c.id === fromColumnId));
+      const nowDone = isDoneColumn(columns().find((c) => c.id === nextColumnId));
+      let spawned = null;
+      if (nowDone && !wasDone) {
+        card.completedAt = nowIsoDate();
+        if (card.recurrence && card.recurrence.every) {
+          spawned = buildRecurringClone(card, fromColumnId);
+        }
+      } else if (!nowDone && wasDone) {
+        delete card.completedAt;
+      }
+      return spawned;
     }
 
     function openEditor(id, defaultColumn, opts) {
@@ -3055,6 +4524,9 @@
       fieldTitle.value = card?.title || "";
       fieldNotes.value = card?.notes || "";
       if (fieldDue) fieldDue.value = normalizeDueValue(card?.dueDate) || "";
+      const recSel = document.getElementById("field-recurrence");
+      if (recSel) recSel.value = (card && card.recurrence && card.recurrence.every) || "";
+      refreshMilestoneSelect(card?.milestoneId || "");
       editorAttachments = cloneAttachments(card?.attachments);
       renderEditorAttachments();
       refreshColumnSelect(card?.column || defaultColumn || fallbackColumnId() || columns()[0]?.id);
@@ -3100,13 +4572,8 @@
       if (editId) {
         const card = state.cards.find((c) => c.id === editId);
         if (card) {
-          card.title = title;
-          card.notes = fieldNotes.value.trim();
-          card.column = fieldColumn.value;
-          card.color = selectedCardColor || "none";
-          card.dueDate = dueDate;
-          card.attachments = attachments;
-          delete card.tag;
+          const spawned = applyCardMetaFromEditor(card, dueDate, attachments);
+          if (spawned) state.cards.push(spawned);
         }
         createAndPlace = false;
         saveState("Idee aktualisiert");
@@ -3114,7 +4581,7 @@
         render();
       } else {
         const newId = uid();
-        state.cards.push({
+        const newCard = {
           id: newId,
           title,
           notes: fieldNotes.value.trim(),
@@ -3125,7 +4592,18 @@
           color: selectedCardColor || "none",
           dueDate,
           attachments,
-        });
+        };
+        const msSel = document.getElementById("field-milestone");
+        if (msSel && msSel.value) newCard.milestoneId = msSel.value;
+        const recSel = document.getElementById("field-recurrence");
+        const every = recSel ? recSel.value : "";
+        if (every === "daily" || every === "weekly" || every === "monthly") {
+          newCard.recurrence = {
+            every,
+            anchorColumnId: newCard.column,
+          };
+        }
+        state.cards.push(newCard);
         createAndPlace = false;
         editor.close();
         if (shouldPlace) {
@@ -3157,9 +4635,19 @@
     document.getElementById("btn-delete-card").addEventListener("click", () => {
       if (!editId) return;
       const id = editId;
+      const extraAttachments = cloneAttachments(editorAttachments);
       editor.close();
       createAndPlace = false;
-      deleteCard(id);
+      openDeleteCardDialog(id, extraAttachments);
+    });
+    document.getElementById("btn-delete-card-cancel").addEventListener("click", () => {
+      pendingDeleteId = null;
+      pendingDeleteAttachments = [];
+      deleteCardDialog.close();
+    });
+    document.getElementById("delete-card-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      confirmDeleteCard();
     });
     document.getElementById("btn-copy-card").addEventListener("click", () => {
       openCopyDialog();
@@ -3171,6 +4659,14 @@
       loadCopyBoardColumns(copyBoardSelect.value);
     });
     copyForm.addEventListener("submit", submitCopyCard);
+    const btnReloadNow = document.getElementById("btn-reload-now");
+    const btnReloadDismiss = document.getElementById("btn-reload-dismiss");
+    if (btnReloadNow) {
+      btnReloadNow.addEventListener("click", () => location.reload());
+    }
+    if (btnReloadDismiss) {
+      btnReloadDismiss.addEventListener("click", () => hideReloadBanner());
+    }
     document.getElementById("btn-card-flip-dialog").addEventListener("click", () => {
       if (!editId) return;
       const card = state.cards.find((c) => c.id === editId);
@@ -3192,14 +4688,74 @@
       const hint = document.getElementById("field-col-hint").value.trim();
       if (!title) return;
       document.getElementById("column-editor").close();
-      addColumn(title, hint, selectedColColor);
+      const doneCb = document.getElementById("field-col-done");
+      addColumn(title, hint, selectedColColor, !!(doneCb && doneCb.checked));
     });
     document.getElementById("btn-cancel-place").addEventListener("click", () => stopPlaceMode(true));
     document.addEventListener("mousemove", onPlaceMouseMove);
 
+    document.querySelectorAll(".view-switch [data-view]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        boardView = btn.getAttribute("data-view") || "board";
+        calendarCursor = startOfDay(calendarCursor);
+        render();
+      });
+    });
+    const btnCalPrev = document.getElementById("btn-cal-prev");
+    const btnCalNext = document.getElementById("btn-cal-next");
+    const btnCalToday = document.getElementById("btn-cal-today");
+    if (btnCalPrev) {
+      btnCalPrev.addEventListener("click", () => {
+        if (boardView === "week") calendarCursor.setDate(calendarCursor.getDate() - 7);
+        else calendarCursor.setMonth(calendarCursor.getMonth() - 1);
+        calendarCursor = startOfDay(calendarCursor);
+        render();
+      });
+    }
+    if (btnCalNext) {
+      btnCalNext.addEventListener("click", () => {
+        if (boardView === "week") calendarCursor.setDate(calendarCursor.getDate() + 7);
+        else calendarCursor.setMonth(calendarCursor.getMonth() + 1);
+        calendarCursor = startOfDay(calendarCursor);
+        render();
+      });
+    }
+    if (btnCalToday) {
+      btnCalToday.addEventListener("click", () => {
+        calendarCursor = startOfDay(new Date());
+        render();
+      });
+    }
+    const btnStats = document.getElementById("btn-stats");
+    if (btnStats) btnStats.addEventListener("click", () => openStatsDialog());
+    const msForm = document.getElementById("milestone-form");
+    if (msForm) {
+      msForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const titleEl = document.getElementById("field-ms-title");
+        const dateEl = document.getElementById("field-ms-date");
+        const title = (titleEl && titleEl.value.trim()) || "";
+        if (!title) return;
+        if (!Array.isArray(state.milestones)) state.milestones = [];
+        state.milestones.push({
+          id: "m_" + uid().replace(/^c_/, ""),
+          title,
+          targetDate: normalizeDueValue(dateEl && dateEl.value),
+        });
+        document.getElementById("milestone-dialog").close();
+        saveState("Milestone angelegt");
+        render();
+      });
+    }
+    const btnMsCancel = document.getElementById("btn-ms-cancel");
+    if (btnMsCancel) {
+      btnMsCancel.addEventListener("click", () => document.getElementById("milestone-dialog").close());
+    }
+
     document.getElementById("search").addEventListener("input", (e) => {
       searchQuery = e.target.value;
       render();
+      scheduleOtherBoardSearch();
     });
 
     const colorFilterBtn = document.getElementById("btn-color-filter");
@@ -3243,16 +4799,26 @@
     }
 
     function exportFilename(ext) {
-      const base = (BOARD_TITLE || DEFAULT_FILE_NAME || "Kanban")
+      // Nur ASCII – Sonderzeichen im Titel können Content-Disposition / fetch sprengen
+      let base = String(BOARD_TITLE || DEFAULT_FILE_NAME || "Kanban")
+        .replace(/[–—]/g, "-")
+        .replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue")
+        .replace(/Ä/g, "Ae").replace(/Ö/g, "Oe").replace(/Ü/g, "Ue")
+        .replace(/ß/g, "ss")
+        .replace(/[^\x20-\x7E]+/g, " ")
         .replace(/[<>:"/\\|?*]+/g, " ")
+        .replace(/[^\w.\- ()\[\]]+/g, " ")
+        .replace(/\s+/g, " ")
         .trim()
-        .slice(0, 80) || "Kanban";
+        .replace(/^[.\s_]+|[.\s_]+$/g, "")
+        .slice(0, 80);
+      if (!base) base = "Kanban";
       return base + "." + ext;
     }
 
     async function exportViaServer(format) {
       if (IS_FILE_PROTOCOL) {
-        throw new Error("Excel/Word/PDF brauchen den Kanban-Server (BAT / Desktop-Verknüpfung).");
+        throw new Error("Excel/Word/ODT/PDF brauchen den Kanban-Server (BAT / Desktop-Verknüpfung).");
       }
       const res = await fetch("/api/export", {
         method: "POST",
@@ -3270,7 +4836,12 @@
       const blob = await res.blob();
       const dispo = res.headers.get("Content-Disposition") || "";
       const match = /filename=\"([^\"]+)\"/i.exec(dispo);
-      downloadBlob(blob, match ? match[1] : exportFilename(format === "xlsx" ? "xlsx" : format === "docx" ? "docx" : format));
+      const ext =
+        format === "xlsx" ? "xlsx" :
+        format === "docx" ? "docx" :
+        format === "odt" ? "odt" :
+        format === "pdf" ? "pdf" : format;
+      downloadBlob(blob, match ? match[1] : exportFilename(ext));
     }
 
     function exportJson() {
@@ -3417,6 +4988,10 @@
           statusEl.textContent = "✓ JSON exportiert";
         } else if (format === "png") {
           exportPngBoard();
+        } else if (format === "cleanup-orphans") {
+          await cleanupOrphans();
+        } else if (format === "versions") {
+          await openVersionsDialog();
         } else {
           statusEl.textContent = "Exportiere…";
           await exportViaServer(format);
@@ -3428,14 +5003,206 @@
       }
     });
 
+    async function openVersionsDialog() {
+      if (IS_FILE_PROTOCOL) {
+        throw new Error(bt("board.versionsNeedServer"));
+      }
+      const dlg = document.getElementById("versions-dialog");
+      const list = document.getElementById("versions-list");
+      if (!dlg || !list) return;
+      list.innerHTML = "";
+      const res = await fetch("/api/versions", { cache: "no-store" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) {
+        throw new Error(data.error || ("Versionen laden fehlgeschlagen (" + res.status + ")"));
+      }
+      const versions = data.versions || [];
+      if (!versions.length) {
+        const empty = document.createElement("p");
+        empty.className = "attach-hint";
+        empty.textContent = bt("board.versionsEmpty");
+        list.appendChild(empty);
+      } else {
+        for (const v of versions) {
+          const row = document.createElement("div");
+          row.className = "stats-bar-row";
+          row.style.gridTemplateColumns = "1fr auto";
+          const left = document.createElement("div");
+          left.textContent = (v.at || "") + " · " + (v.file || "");
+          const restore = document.createElement("button");
+          restore.type = "button";
+          restore.textContent = bt("board.versionsRestore");
+          restore.addEventListener("click", async () => {
+            if (!confirm(bt("board.versionsRestoreConfirm", { file: v.file || "" }))) return;
+            restore.disabled = true;
+            try {
+              const r = await fetch("/api/versions/restore", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ file: v.file }),
+              });
+              const out = await r.json().catch(() => ({}));
+              if (!r.ok || out.ok === false) {
+                throw new Error(out.error || "Wiederherstellen fehlgeschlagen");
+              }
+              location.reload();
+            } catch (err) {
+              alert(err && err.message ? err.message : String(err));
+              restore.disabled = false;
+            }
+          });
+          row.append(left, restore);
+          list.appendChild(row);
+        }
+      }
+      dlg.showModal();
+    }
+
+    function parseCsvText(text) {
+      const raw = String(text || "").replace(/^\uFEFF/, "");
+      const firstLine = (raw.split(/\r?\n/).find((l) => l.trim()) || "");
+      const delim = (firstLine.split(";").length > firstLine.split(",").length) ? ";" : ",";
+      const rows = [];
+      let row = [];
+      let cell = "";
+      let inQuotes = false;
+      for (let i = 0; i < raw.length; i++) {
+        const ch = raw[i];
+        const next = raw[i + 1];
+        if (inQuotes) {
+          if (ch === '"' && next === '"') {
+            cell += '"';
+            i++;
+          } else if (ch === '"') {
+            inQuotes = false;
+          } else {
+            cell += ch;
+          }
+          continue;
+        }
+        if (ch === '"') {
+          inQuotes = true;
+          continue;
+        }
+        if (ch === delim) {
+          row.push(cell);
+          cell = "";
+          continue;
+        }
+        if (ch === "\n") {
+          row.push(cell);
+          cell = "";
+          if (row.some((c) => String(c).trim())) rows.push(row);
+          row = [];
+          continue;
+        }
+        if (ch === "\r") continue;
+        cell += ch;
+      }
+      row.push(cell);
+      if (row.some((c) => String(c).trim())) rows.push(row);
+      return rows;
+    }
+
+    function normalizeCsvHeader(h) {
+      return String(h || "")
+        .trim()
+        .toLowerCase()
+        .replace(/ä/g, "ae")
+        .replace(/ö/g, "oe")
+        .replace(/ü/g, "ue")
+        .replace(/ß/g, "ss");
+    }
+
+    function importCardsFromCsv(text) {
+      const rows = parseCsvText(text);
+      if (rows.length < 2) throw new Error(bt("board.csvNeedHeader"));
+      const headers = rows[0].map(normalizeCsvHeader);
+      const idx = {
+        title: headers.findIndex((h) => ["titel", "title", "name", "karte"].includes(h)),
+        notes: headers.findIndex((h) => ["notizen", "notes", "beschreibung", "description"].includes(h)),
+        column: headers.findIndex((h) => ["spalte", "column", "status"].includes(h)),
+        due: headers.findIndex((h) => h.includes("faellig") || h.includes("due") || h === "fällig" || h === "fällig am"),
+        color: headers.findIndex((h) => ["farbe", "color", "colour"].includes(h)),
+      };
+      if (idx.title < 0) throw new Error(bt("board.csvNeedTitle"));
+
+      const colByTitle = {};
+      columns().forEach((c) => {
+        colByTitle[String(c.title || "").trim().toLowerCase()] = c.id;
+        colByTitle[String(c.id || "").trim().toLowerCase()] = c.id;
+      });
+      const fallback = fallbackColumnId() || (columns()[0] && columns()[0].id) || "brainstorm";
+      let added = 0;
+      for (let r = 1; r < rows.length; r++) {
+        const cells = rows[r];
+        const title = String(cells[idx.title] || "").trim();
+        if (!title) continue;
+        const notes = idx.notes >= 0 ? String(cells[idx.notes] || "").trim() : "";
+        const colRaw = idx.column >= 0 ? String(cells[idx.column] || "").trim().toLowerCase() : "";
+        const column = (colRaw && colByTitle[colRaw]) || fallback;
+        const dueDate = idx.due >= 0 ? normalizeDueValue(cells[idx.due]) : "";
+        let color = idx.color >= 0 ? String(cells[idx.color] || "").trim().toLowerCase() : "none";
+        if (!COLOR_OPTIONS.some((c) => c.id === color)) color = "none";
+        state.cards.push({
+          id: uid(),
+          title,
+          notes,
+          column,
+          color,
+          dueDate,
+          createdAt: nowIsoDate(),
+          attachments: [],
+        });
+        added += 1;
+      }
+      return added;
+    }
+
     document.addEventListener("click", (e) => {
       if (!e.target.closest(".export-wrap")) {
         const menu = document.getElementById("export-menu");
         if (menu) menu.setAttribute("hidden", "");
         const btn = document.getElementById("btn-export");
         if (btn) btn.setAttribute("aria-expanded", "false");
+        const im = document.getElementById("import-menu");
+        if (im) im.setAttribute("hidden", "");
+        const ib = document.getElementById("btn-import");
+        if (ib) ib.setAttribute("aria-expanded", "false");
       }
     });
+
+    const btnImport = document.getElementById("btn-import");
+    if (btnImport) {
+      btnImport.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const menu = document.getElementById("import-menu");
+        const open = menu && menu.hasAttribute("hidden");
+        if (menu) {
+          if (open) menu.removeAttribute("hidden");
+          else menu.setAttribute("hidden", "");
+        }
+        btnImport.setAttribute("aria-expanded", open ? "true" : "false");
+        const exportMenu = document.getElementById("export-menu");
+        if (exportMenu) {
+          exportMenu.setAttribute("hidden", "");
+          document.getElementById("btn-export").setAttribute("aria-expanded", "false");
+        }
+      });
+    }
+    const importMenu = document.getElementById("import-menu");
+    if (importMenu) {
+      importMenu.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-import]");
+        if (!btn) return;
+        e.stopPropagation();
+        importMenu.setAttribute("hidden", "");
+        if (btnImport) btnImport.setAttribute("aria-expanded", "false");
+        const kind = btn.getAttribute("data-import");
+        if (kind === "csv") document.getElementById("import-csv").click();
+        else document.getElementById("import").click();
+      });
+    }
 
     document.getElementById("import").addEventListener("change", async (e) => {
       const file = e.target.files?.[0];
@@ -3444,14 +5211,42 @@
         const text = await file.text();
         const parsed = JSON.parse(text);
         if (!parsed || !Array.isArray(parsed.cards)) throw new Error("Ungültiges Format");
-        state = parsed;
+        if (!confirm(bt("board.importJsonConfirm"))) {
+          e.target.value = "";
+          return;
+        }
+        state = normalizeState(parsed);
         saveState("Importiert");
         render();
+        statusEl.textContent = "✓ " + bt("board.importJsonDone");
       } catch (err) {
-        alert("Import fehlgeschlagen: " + err.message);
+        alert("Import fehlgeschlagen: " + (err.message || err));
       }
       e.target.value = "";
     });
+
+    const importCsv = document.getElementById("import-csv");
+    if (importCsv) {
+      importCsv.addEventListener("change", async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        try {
+          let text = await file.text();
+          if (text.includes("\uFFFD")) {
+            const buf = await file.arrayBuffer();
+            text = new TextDecoder("latin-1").decode(buf);
+          }
+          const n = importCardsFromCsv(text);
+          if (!n) throw new Error(bt("board.csvNone"));
+          saveState(bt("board.csvImported", { n: String(n) }));
+          render();
+          statusEl.textContent = "✓ " + bt("board.csvImported", { n: String(n) });
+        } catch (err) {
+          alert("CSV-Import fehlgeschlagen: " + (err.message || err));
+        }
+        e.target.value = "";
+      });
+    }
 
     document.getElementById("btn-undo").addEventListener("click", () => undoHistory());
     document.getElementById("btn-redo").addEventListener("click", () => redoHistory());
@@ -3921,6 +5716,10 @@
       if (settingsBtn) {
         settingsBtn.addEventListener("click", () => themeDialogApi.open(currentTheme));
       }
+      const exitBtn = document.getElementById("btn-exit");
+      if (exitBtn) {
+        exitBtn.addEventListener("click", () => exitBoard());
+      }
     }
 
     async function boot() {
@@ -3964,6 +5763,7 @@
       }
       restoreAutosaveFile();
       setInterval(updateHistoryButtons, 60000);
+      startBoardPresence();
 
       const deepCard = new URLSearchParams(location.search).get("card");
       if (deepCard && state.cards.some((c) => c.id === deepCard)) {

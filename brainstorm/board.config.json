@@ -1,0 +1,20 @@
+{
+  "title": "Janamathics – Kanban & Brainstorm",
+  "slug": "janamathics",
+  "boardHtml": "janamathics-kanban.html",
+  "boardJson": "janamathics-kanban.json",
+  "flipchartJson": "janamathics-flipchart.json",
+  "port": 8765,
+  "source": "janamathics-kanban",
+  "boardDir": "brainstorm",
+  "theme": {
+    "bg": "#1f3d2f",
+    "bg2": "#274c3a",
+    "accent": "#e2a53a",
+    "chalk": "#e8f0e6",
+    "angle": 160,
+    "spots": true,
+    "font": "segoe",
+    "lang": "auto"
+  }
+}

@@ -17,5 +17,10 @@ venv/
 **/manager-server.log
 **/manager-registry.json
 
-# Office-Lockfiles
+# Windows-Verknüpfungen (lokal generiert)
+*.lnk
+
+# Ideen-Entwürfe / Office-Lockfiles
+Kanban-Ideen-und-Verbesserungen.*
+.~lock.*
 ~$*

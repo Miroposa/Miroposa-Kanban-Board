@@ -12,7 +12,7 @@ from typing import Any
 
 KIT_ROOT = Path(__file__).resolve().parent
 TEMPLATE = KIT_ROOT / "template"
-# Projektwurzel = Ordner über kanban-kit (nicht mehr docs/ im Godot-Repo)
+# Projektwurzel = Ordner über kanban-kit/ (Repo-Root)
 REPO_ROOT = KIT_ROOT.parent
 
 try:
@@ -49,6 +49,10 @@ PLACEHOLDER_FILES = (
     "Kanban oeffnen.bat",
     "kanban_server.py",
     "export_lib.py",
+)
+
+# Gemeinsame Libs liegen nur in kanban-kit/ (nicht doppelt unter template/)
+SHARED_LIB_FILES = (
     "theme_lib.js",
     "theme_shared.css",
     "theme_lib.py",
@@ -56,6 +60,11 @@ PLACEHOLDER_FILES = (
 )
 
 COPY_ONLY_FILES = ()  # reserved; all listed above are copied (placeholders applied when present)
+
+STOP_SCRIPT_FILES = (
+    "Kanban Server beenden.ps1",
+    "Kanban Server beenden.bat",
+)
 
 
 class BoardError(Exception):
@@ -183,6 +192,17 @@ def create_board(
             dest_name = flipchart_json
         (out_dir / dest_name).write_text(text, encoding="utf-8")
 
+    for fname in SHARED_LIB_FILES:
+        src = KIT_ROOT / fname
+        if not src.exists():
+            raise BoardError(f"Shared-Lib fehlt: {src}")
+        shutil.copy2(src, out_dir / fname)
+
+    for fname in STOP_SCRIPT_FILES:
+        src = TEMPLATE / fname
+        if src.exists():
+            shutil.copy2(src, out_dir / fname)
+
     # Theme aus Manager (oder Default) in board.config.json schreiben
     cfg_path = out_dir / "board.config.json"
     try:
@@ -226,16 +246,128 @@ Nicht die HTML-Datei per Doppelklick öffnen (`file://`) – sonst landet der St
     }
 
 
+def mapping_from_config(out_dir: Path, cfg: dict[str, Any]) -> dict[str, str]:
+    slug_val = str(cfg.get("slug") or "").strip()
+    if not slug_val:
+        raise BoardError("board.config.json: slug fehlt")
+    try:
+        board_dir = str(out_dir.relative_to(REPO_ROOT)).replace("\\", "/")
+    except ValueError:
+        board_dir = str(cfg.get("boardDir") or out_dir).replace("\\", "/")
+    return {
+        "__BOARD_TITLE__": str(cfg.get("title") or f"{slug_val} – Kanban Board"),
+        "__BOARD_SLUG__": slug_val,
+        "__BOARD_HTML__": str(cfg.get("boardHtml") or f"{slug_val}-kanban.html"),
+        "__BOARD_JSON__": str(cfg.get("boardJson") or f"{slug_val}-kanban.json"),
+        "__FLIPCHART_JSON__": str(cfg.get("flipchartJson") or f"{slug_val}-flipchart.json"),
+        "__BOARD_PORT__": str(int(cfg.get("port") or 8766)),
+        "__BOARD_SOURCE__": str(cfg.get("source") or f"{slug_val}-kanban"),
+        "__BOARD_DIR__": board_dir,
+        "__STORAGE_KEY__": f"{slug_val}-kanban-v1",
+        "__FILE_HANDLE_DB__": f"{slug_val}-kanban-handles",
+        "__FLIPCHART_LS_PREFIX__": f"{slug_val}-flipchart-v1:",
+    }
+
+
+def update_board_at(path: str | Path) -> dict[str, Any]:
+    """Programmdateien eines bestehenden Boards aus der Vorlage aktualisieren."""
+    if not TEMPLATE.is_dir():
+        raise BoardError(f"Vorlage fehlt: {TEMPLATE}")
+
+    out_dir = Path(path).expanduser().resolve()
+    cfg_path = out_dir / "board.config.json"
+    if not cfg_path.exists():
+        raise BoardError(f"Kein Board (board.config.json fehlt): {out_dir}")
+
+    cfg = json.loads(cfg_path.read_text(encoding="utf-8"))
+    mapping = mapping_from_config(out_dir, cfg)
+    board_html = mapping["__BOARD_HTML__"]
+    preserved_theme = cfg.get("theme")
+    preserved_icon = cfg.get("icon")
+
+    (out_dir / "flipcharts").mkdir(exist_ok=True)
+    (out_dir / "attachments").mkdir(exist_ok=True)
+
+    updated: list[str] = []
+    for fname in PLACEHOLDER_FILES:
+        if fname in ("board.json", "flipchart.json"):
+            continue
+        src = TEMPLATE / fname
+        if not src.exists():
+            raise BoardError(f"Vorlage-Datei fehlt: {src}")
+        text = apply_placeholders(src.read_text(encoding="utf-8"), mapping)
+        if fname == "board.html":
+            dest_name = board_html
+        elif fname == "board.config.json":
+            dest_name = "board.config.json"
+            new_cfg = json.loads(text)
+            if preserved_theme:
+                new_cfg["theme"] = _normalize_theme(preserved_theme)
+            if preserved_icon:
+                new_cfg["icon"] = preserved_icon
+            text = json.dumps(new_cfg, ensure_ascii=False, indent=2) + "\n"
+        else:
+            dest_name = fname
+        (out_dir / dest_name).write_text(text, encoding="utf-8")
+        updated.append(dest_name)
+
+    for fname in SHARED_LIB_FILES:
+        src = KIT_ROOT / fname
+        if not src.exists():
+            raise BoardError(f"Shared-Lib fehlt: {src}")
+        shutil.copy2(src, out_dir / fname)
+        updated.append(fname)
+
+    for fname in STOP_SCRIPT_FILES:
+        src = TEMPLATE / fname
+        if src.exists():
+            shutil.copy2(src, out_dir / fname)
+            updated.append(fname)
+
+    port_val = int(mapping["__BOARD_PORT__"])
+    return {
+        "ok": True,
+        "slug": mapping["__BOARD_SLUG__"],
+        "path": str(out_dir),
+        "port": port_val,
+        "boardHtml": board_html,
+        "url": f"http://127.0.0.1:{port_val}/{board_html}",
+        "updated": updated,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Legt ein neues lokales Kanban/Brainstorm-Board aus der Vorlage an."
     )
-    parser.add_argument("--name", "-n", required=True, help='Anzeigename, z. B. "Mein Spiel"')
+    parser.add_argument("--name", "-n", default="", help='Anzeigename, z. B. "Mein Spiel"')
     parser.add_argument("--slug", "-s", default="", help="Ordner-/Dateiname")
     parser.add_argument("--out", "-o", default="", help="Zielordner")
     parser.add_argument("--port", "-p", type=int, default=0, help="HTTP-Port")
     parser.add_argument("--force", action="store_true", help="Ziel überschreiben")
+    parser.add_argument(
+        "--update",
+        metavar="BOARD_DIR",
+        default="",
+        help="Bestehendes Board aktualisieren (Programmdateien aus Vorlage)",
+    )
     args = parser.parse_args()
+
+    if args.update:
+        try:
+            result = update_board_at(args.update)
+        except BoardError as exc:
+            print(str(exc), file=sys.stderr)
+            return 1
+        print(f"Board aktualisiert: {result['path']}")
+        print(f"  Dateien: {', '.join(result['updated'])}")
+        print(f"  URL   : {result['url']}")
+        print("  Hinweis: Kanban-Server neu starten und Board-Seite hart neu laden (Strg+F5).")
+        return 0
+
+    if not args.name.strip():
+        print("Name fehlt (--name / -n).", file=sys.stderr)
+        return 1
 
     try:
         result = create_board(

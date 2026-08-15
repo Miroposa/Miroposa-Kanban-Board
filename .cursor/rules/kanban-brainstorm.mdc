@@ -10,5 +10,6 @@ Feature-Ideen und Roadmap liegen in `brainstorm/janamathics-kanban.html` (lokale
 
 - Öffnen: `brainstorm/Kanban oeffnen.bat` (nicht `file://`)
 - Anleitung: `brainstorm/README.md`
+- Feature-Stand = Kanban-Kit-Template; nachziehen mit `python kanban-kit/sync-janamathics.py`
 - Bei neuen Features: passende Karten vorschlagen oder Board-JSON aktualisieren (nur wenn der User das will)
 - **Weitere Projekte:** Grundgerüst unter `kanban-kit/` → `python kanban-kit/new-board.py --name "…"`

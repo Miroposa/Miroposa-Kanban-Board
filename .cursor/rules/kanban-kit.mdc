@@ -13,4 +13,4 @@ Wiederverwendbares Grundgerüst unter `kanban-kit/` (Vorlage aus dem Janamathics
 - CLI alternativ: `python kanban-kit/new-board.py --name "Projektname"`
 - Neue Boards: standardmäßig im **Downloads**-Ordner (`Downloads/<slug>/`)
 - Anleitung: `kanban-kit/README.md`
-- Janamathics: `brainstorm/` (Port 8765)
+- Janamathics: `brainstorm/` (Port 8765); Features nachziehen: `python kanban-kit/sync-janamathics.py`

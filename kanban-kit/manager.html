@@ -212,6 +212,81 @@
       box-shadow: 0 0 0 3px rgba(226, 165, 58, 0.22);
     }
 
+    .card-search-block {
+      margin: 0 0 14px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .card-search-block > label {
+      margin: 0;
+    }
+
+    .card-search-block input[type="search"] {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      outline: none;
+    }
+
+    .card-search-block input[type="search"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(226, 165, 58, 0.22);
+    }
+
+    .card-hit-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .card-hit {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+
+    .card-hit h4 {
+      margin: 0 0 2px;
+      font-size: 0.98rem;
+      color: var(--ink);
+    }
+
+    .card-hit .meta {
+      margin: 0;
+    }
+
+    .card-hit .snippet {
+      margin: 4px 0 0;
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .card-hit a.open-link {
+      color: #2a1d05;
+      background: var(--accent);
+      text-decoration: none;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-weight: 650;
+      font-size: 0.88rem;
+      white-space: nowrap;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.15);
+    }
+
+    .card-hit a.open-link:hover {
+      filter: brightness(1.04);
+    }
+
     .board-list {
       display: grid;
       gap: 10px;
@@ -434,6 +509,7 @@
         <button type="button" class="secondary" id="btn-manager-shortcut" data-i18n="btn.desktopShortcut">Desktop-Verknüpfung</button>
         <button type="button" class="secondary" id="btn-settings" data-i18n="btn.settings">Einstellungen</button>
         <button type="button" class="secondary" id="btn-refresh" data-i18n="btn.refresh">Aktualisieren</button>
+        <button type="button" class="secondary" id="btn-exit" data-i18n="btn.exit" data-i18n-title="btn.exitTitle">Beenden</button>
       </div>
     </header>
 
@@ -492,6 +568,20 @@
 
       <section class="panel">
         <h2 data-i18n="section.yourBoards">Deine Boards</h2>
+        <div class="card-search-block">
+          <label>
+            <span data-i18n="field.cardSearch">Karten über alle Boards</span>
+            <input
+              id="card-search"
+              type="search"
+              data-i18n-placeholder="ph.cardSearch"
+              placeholder="Titel oder Notizen suchen…"
+              autocomplete="off"
+            />
+          </label>
+          <div class="card-hit-list" id="card-hit-list" hidden></div>
+          <p class="hint" id="card-search-status" hidden></p>
+        </div>
         <div class="board-toolbar">
           <input
             id="board-search"
@@ -524,12 +614,17 @@
     const formStatus = document.getElementById("form-status");
     const boardList = document.getElementById("board-list");
     const boardSearch = document.getElementById("board-search");
+    const cardSearch = document.getElementById("card-search");
+    const cardHitList = document.getElementById("card-hit-list");
+    const cardSearchStatus = document.getElementById("card-search-status");
     const metaHint = document.getElementById("meta-hint");
     const pathHint = document.getElementById("path-hint");
     const iconPreview = document.getElementById("icon-preview");
     const iconGallery = document.getElementById("icon-gallery");
     let slugTouched = false;
     let slugTimer = null;
+    let cardSearchTimer = null;
+    let cardSearchSeq = 0;
     let boardsRoot = "";
     let iconPreviewUrl = "";
     let selectedIconId = "";
@@ -537,6 +632,9 @@
     /** @type {Array<object>} */
     let allBoards = [];
     let boardSearchQuery = "";
+    /** @type {Array<object>} */
+    let cardHits = [];
+    let cardSearchQuery = "";
     function t(key, vars) {
       return window.KanbanI18n ? window.KanbanI18n.t(key, vars) : key;
     }
@@ -547,6 +645,7 @@
       window.KanbanI18n.applyToDom(document);
       updatePathHint();
       refreshBoards().catch(() => {});
+      renderCardHits();
     }
 
     let currentTheme = window.KanbanTheme.normalizeTheme(window.KanbanTheme.DEFAULT_THEME);
@@ -812,6 +911,30 @@
         actions.appendChild(iconBtn);
 
         if (!board.legacy) {
+          const updateBtn = document.createElement("button");
+          updateBtn.type = "button";
+          updateBtn.className = "secondary";
+          updateBtn.textContent = t("btn.updateBoard");
+          updateBtn.title = t("btn.updateBoard");
+          updateBtn.addEventListener("click", async () => {
+            if (!confirm(t("confirm.updateBoard", { name: board.name || board.slug }))) return;
+            updateBtn.disabled = true;
+            try {
+              await api("/api/boards/update", {
+                method: "POST",
+                body: JSON.stringify({ slug: board.slug }),
+              });
+              alert(t("status.boardUpdated"));
+            } catch (err) {
+              alert(err.message || String(err));
+            } finally {
+              updateBtn.disabled = false;
+            }
+          });
+          actions.appendChild(updateBtn);
+        }
+
+        if (!board.legacy) {
           const delBtn = document.createElement("button");
           delBtn.type = "button";
           delBtn.className = "danger";
@@ -841,6 +964,111 @@
       }
     }
 
+    function setCardSearchStatus(text, visible) {
+      cardSearchStatus.textContent = text || "";
+      cardSearchStatus.hidden = !visible;
+    }
+
+    function renderCardHits() {
+      const q = cardSearchQuery.trim();
+      cardHitList.innerHTML = "";
+
+      if (q.length < 2) {
+        cardHitList.hidden = true;
+        setCardSearchStatus("", false);
+        return;
+      }
+
+      if (!cardHits.length) {
+        cardHitList.hidden = true;
+        setCardSearchStatus(t("empty.cardSearch"), true);
+        return;
+      }
+
+      setCardSearchStatus(t("status.cardSearchHits", { n: String(cardHits.length) }), true);
+      cardHitList.hidden = false;
+
+      for (const hit of cardHits) {
+        const el = document.createElement("article");
+        el.className = "card-hit";
+
+        const left = document.createElement("div");
+        const h4 = document.createElement("h4");
+        h4.textContent = hit.title || t("card.untitled");
+        left.appendChild(h4);
+
+        const meta = document.createElement("p");
+        meta.className = "meta";
+        const parts = [hit.boardName || hit.boardSlug];
+        if (hit.columnTitle) parts.push(hit.columnTitle);
+        if (hit.matchedIn === "notes") parts.push(t("card.matchNotes"));
+        meta.textContent = parts.filter(Boolean).join(" · ");
+        left.appendChild(meta);
+
+        if (hit.notesPreview && hit.matchedIn === "notes") {
+          const snip = document.createElement("p");
+          snip.className = "snippet";
+          snip.textContent = hit.notesPreview;
+          left.appendChild(snip);
+        }
+
+        const openLink = document.createElement("a");
+        openLink.className = "open-link";
+        openLink.href = "#";
+        openLink.textContent = t("btn.openCard");
+        openLink.title = t("btn.openCardTitle", {
+          board: hit.boardName || hit.boardSlug || "",
+        });
+        openLink.addEventListener("click", async (e) => {
+          e.preventDefault();
+          openLink.setAttribute("aria-disabled", "true");
+          try {
+            await api("/api/boards/open", {
+              method: "POST",
+              body: JSON.stringify({
+                slug: hit.boardSlug,
+                cardId: hit.cardId,
+              }),
+            });
+            await refreshBoards();
+          } catch (err) {
+            alert(err.message || String(err));
+          } finally {
+            openLink.removeAttribute("aria-disabled");
+          }
+        });
+
+        el.appendChild(left);
+        el.appendChild(openLink);
+        cardHitList.appendChild(el);
+      }
+    }
+
+    async function runCardSearch(query) {
+      const q = String(query || "").trim();
+      cardSearchQuery = q;
+      const seq = ++cardSearchSeq;
+
+      if (q.length < 2) {
+        cardHits = [];
+        renderCardHits();
+        return;
+      }
+
+      setCardSearchStatus(t("status.cardSearching"), true);
+      try {
+        const data = await api("/api/cards/search?q=" + encodeURIComponent(q) + "&limit=40");
+        if (seq !== cardSearchSeq) return;
+        cardHits = data.results || [];
+        renderCardHits();
+      } catch (err) {
+        if (seq !== cardSearchSeq) return;
+        cardHits = [];
+        cardHitList.hidden = true;
+        setCardSearchStatus(err.message || String(err), true);
+      }
+    }
+
     async function refreshBoards() {
       const data = await api("/api/boards");
       allBoards = data.boards || [];
@@ -850,6 +1078,14 @@
     boardSearch.addEventListener("input", () => {
       boardSearchQuery = boardSearch.value || "";
       renderBoards();
+    });
+
+    cardSearch.addEventListener("input", () => {
+      clearTimeout(cardSearchTimer);
+      const value = cardSearch.value || "";
+      cardSearchTimer = setTimeout(() => {
+        runCardSearch(value).catch(() => {});
+      }, 220);
     });
 
     fieldSlug.addEventListener("input", () => {
@@ -1015,6 +1251,42 @@
       } catch (err) {
         alert(err.message || String(err));
       }
+    });
+
+    let managerExiting = false;
+
+    function beaconShutdown() {
+      try {
+        navigator.sendBeacon(
+          "/api/shutdown",
+          new Blob(["{}"], { type: "application/json" })
+        );
+      } catch {
+        /* ignore */
+      }
+    }
+
+    async function exitManager() {
+      if (!confirm(t("confirm.exit"))) return;
+      managerExiting = true;
+      const btn = document.getElementById("btn-exit");
+      if (btn) btn.disabled = true;
+      try {
+        await api("/api/shutdown", { method: "POST", body: "{}" });
+      } catch {
+        beaconShutdown();
+      }
+      alert(t("status.exitDone"));
+      window.close();
+    }
+
+    document.getElementById("btn-exit").addEventListener("click", () => {
+      exitManager();
+    });
+
+    window.addEventListener("pagehide", () => {
+      if (managerExiting) return;
+      beaconShutdown();
     });
 
     (async function boot() {
